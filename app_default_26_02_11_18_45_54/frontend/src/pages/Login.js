@@ -42,6 +42,10 @@ const Login = () => {
                 <button className="w-full bg-marsa-blue text-white py-2 rounded hover:bg-blue-800 font-bold">
                     Se Connecter
                 </button>
+                    <div className="mt-4 text-center">
+                        <span>Pas de compte ? </span>
+                        <a href="/register" className="text-blue-500 hover:underline">Créer un compte</a>
+                    </div>
             </form>
         </div>
     );

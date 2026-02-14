@@ -5,9 +5,12 @@ const instance = axios.create({
 });
 
 instance.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+    // Ne pas ajouter le token pour login/register
+    if (!config.url.includes('/auth/login') && !config.url.includes('/auth/register')) {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
     }
     return config;
 });

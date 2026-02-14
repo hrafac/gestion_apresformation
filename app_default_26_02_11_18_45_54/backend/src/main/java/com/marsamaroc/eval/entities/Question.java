@@ -20,4 +20,9 @@ public class Question {
     @ManyToOne
     @JsonIgnore
     private Questionnaire questionnaire;
+
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private java.util.List<Response> responses;
+    
 }

@@ -23,6 +23,9 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (user.getRole() == null) {
+            user.setRole(com.marsamaroc.eval.entities.Role.PARTICIPANT);
+        }
         return ResponseEntity.ok(userRepository.save(user));
     }
 

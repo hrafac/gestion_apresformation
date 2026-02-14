@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Register from './pages/Register';
 
 const PrivateRoute = ({ children }) => {
     const { user } = useAuth();
@@ -16,6 +17,7 @@ function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
                     <Route path="/" element={
                         <PrivateRoute>
                             <Dashboard />
