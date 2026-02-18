@@ -1,5 +1,6 @@
 package com.marsamaroc.eval.dto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class TrainingDTO {
@@ -7,8 +8,8 @@ public class TrainingDTO {
     private String title;
     private String theme;
     private String location;
-    private String startDate;
-    private String endDate;
+    private LocalDateTime startDateTime;
+    private LocalDateTime endDateTime;
     private UserShortDTO trainer;
     private List<UserShortDTO> participants;
 
@@ -20,10 +21,10 @@ public class TrainingDTO {
     public void setTheme(String theme) { this.theme = theme; }
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
-    public String getStartDate() { return startDate; }
-    public void setStartDate(String startDate) { this.startDate = startDate; }
-    public String getEndDate() { return endDate; }
-    public void setEndDate(String endDate) { this.endDate = endDate; }
+    public LocalDateTime getStartDateTime() { return startDateTime; }
+    public void setStartDateTime(LocalDateTime startDateTime) { this.startDateTime = startDateTime; }
+    public LocalDateTime getEndDateTime() { return endDateTime; }
+    public void setEndDateTime(LocalDateTime endDateTime) { this.endDateTime = endDateTime; }
     public UserShortDTO getTrainer() { return trainer; }
     public void setTrainer(UserShortDTO trainer) { this.trainer = trainer; }
     public List<UserShortDTO> getParticipants() { return participants; }

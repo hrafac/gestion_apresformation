@@ -10,6 +10,7 @@ import com.marsamaroc.eval.dto.TrainingDTO;
 import com.marsamaroc.eval.dto.ResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,9 @@ public class RHController {
     private final QuestionnaireRepository questionnaireRepository;
     private final StatsService statsService;
     private final QuestionnaireService questionnaireService;
-    private final TrainingService trainingService;
+    
+    @Autowired
+    private TrainingService trainingService;
     private final ResponseRepository responseRepository;
 
 
@@ -34,7 +37,9 @@ public class RHController {
 
     @PostMapping("/trainings")
     public Training createTraining(@RequestBody Training training) {
-        return trainingRepository.save(training);
+        Training savedTraining = trainingRepository.save(training);
+        // Retourner la formation avec les données complètes des utilisateurs
+        return trainingService.getTrainingWithFullUsers(savedTraining.getId());
     }
 
     @PostMapping("/questionnaires")
