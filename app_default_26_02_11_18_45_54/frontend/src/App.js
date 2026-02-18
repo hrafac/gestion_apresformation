@@ -8,7 +8,7 @@ import Register from './pages/Register';
 
 const PrivateRoute = ({ children }) => {
     const { user } = useAuth();
-    return user ? <><Navbar />{children}</> : <Navigate to="/login" />;
+    return user ? <Navbar>{children}</Navbar> : <Navigate to="/login" />;
 };
 
 function App() {
