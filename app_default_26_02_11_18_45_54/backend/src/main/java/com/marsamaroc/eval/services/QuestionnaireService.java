@@ -33,8 +33,8 @@ public class QuestionnaireService {
         dto.setTitle(t.getTitle());
         dto.setTheme(t.getTheme());
         dto.setLocation(t.getLocation());
-        dto.setStartDate(t.getStartDate() != null ? t.getStartDate().toString() : null);
-        dto.setEndDate(t.getEndDate() != null ? t.getEndDate().toString() : null);
+        dto.setStartDateTime(t.getStartDate());
+        dto.setEndDateTime(t.getEndDate());
         dto.setTrainer(t.getTrainer() != null ? new com.marsamaroc.eval.dto.UserShortDTO() {{
             setId(t.getTrainer().getId());
             setUsername(t.getTrainer().getUsername());
