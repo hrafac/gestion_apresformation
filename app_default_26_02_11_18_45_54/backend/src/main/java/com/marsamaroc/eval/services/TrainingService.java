@@ -5,6 +5,7 @@ import com.marsamaroc.eval.dto.UserShortDTO;
 import com.marsamaroc.eval.entities.Training;
 import com.marsamaroc.eval.entities.User;
 import com.marsamaroc.eval.repositories.TrainingRepository;
+import com.marsamaroc.eval.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,9 @@ public class TrainingService {
     
     @Autowired
     private EmailService emailService;
+    
+    @Autowired
+    private UserRepository userRepository;
     
     // Méthode pour charger les données complètes d'une formation
     public Training getTrainingWithFullUsers(Long trainingId) {
@@ -170,6 +174,35 @@ public class TrainingService {
             "linksSent", sentCount,
             "results", results.toString()
         );
+    }
+
+    // Méthode pour ajouter des participants à une formation
+    public TrainingDTO ajouterDesParticipantsDansUnFormation(Long trainingId, List<Long> participantIds) {
+        Training training = trainingRepository.findById(trainingId)
+            .orElseThrow(() -> new RuntimeException("Formation non trouvée avec l'ID: " + trainingId));
+        
+        // Récupérer les utilisateurs à ajouter
+        List<User> participantsToAdd = userRepository.findAllById(participantIds);
+        
+        // Vérifier que tous les participants existent
+        if (participantsToAdd.size() != participantIds.size()) {
+            throw new RuntimeException("Un ou plusieurs participants n'ont pas été trouvés");
+        }
+        
+        // Initialiser la collection des participants si elle est null
+        if (training.getParticipants() == null) {
+            training.setParticipants(new java.util.HashSet<>());
+        }
+        
+        // Ajouter les participants à la formation
+        for (User participant : participantsToAdd) {
+            training.getParticipants().add(participant);
+        }
+        
+        // Sauvegarder la formation mise à jour
+        Training updatedTraining = trainingRepository.save(training);
+        
+        return toDTO(updatedTraining);
     }
 
             // Sauvegarder les réponses du participant

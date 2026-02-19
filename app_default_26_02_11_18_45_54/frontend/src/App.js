@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Register from './pages/Register';
+import Formation from './pages/Formation';
 
 const PrivateRoute = ({ children }) => {
     const { user } = useAuth();
@@ -17,10 +18,15 @@ function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
+                    <Route path="/register" element={<Register />} />
                     <Route path="/" element={
                         <PrivateRoute>
                             <Dashboard />
+                        </PrivateRoute>
+                    } />
+                    <Route path="/formations" element={
+                        <PrivateRoute>
+                            <Formation />
                         </PrivateRoute>
                     } />
                 </Routes>

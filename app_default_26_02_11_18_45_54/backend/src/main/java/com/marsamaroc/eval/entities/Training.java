@@ -28,6 +28,9 @@ public class Training {
     )
     private Set<User> participants;
 
+    @Enumerated(EnumType.STRING)
+    private TrainingStatus status = TrainingStatus.PAS_ENCORE;
+
     public boolean isCompleted() {
         return endDate != null && endDate.isBefore(LocalDateTime.now());
     }

@@ -2,6 +2,7 @@ package com.marsamaroc.eval.controllers;
 
 import com.marsamaroc.eval.config.JwtService;
 import com.marsamaroc.eval.entities.User;
+import com.marsamaroc.eval.entities.Role;
 import com.marsamaroc.eval.repositories.UserRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -37,6 +39,18 @@ public class AuthController {
         var user = userRepository.findByUsername(request.getUsername()).orElseThrow();
         var token = jwtService.generateToken(user);
         return ResponseEntity.ok(new AuthResponse(token, user));
+    }
+
+    @GetMapping("/users/participants")
+    public ResponseEntity<List<User>> getUserParticipant() {
+        List<User> participants = userRepository.findByRole(Role.PARTICIPANT);
+        return ResponseEntity.ok(participants);
+    }
+
+    @GetMapping("/users/formateurs")
+    public ResponseEntity<List<User>> getUserFormateur() {
+        List<User> formateurs = userRepository.findByRole(Role.TRAINER);
+        return ResponseEntity.ok(formateurs);
     }
 }
 

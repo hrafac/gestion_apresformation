@@ -1,20 +1,33 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogOut, User as UserIcon, Search, X, Moon, Bell, ChevronDown, ChevronRight, Menu, Grid3x3, Bot, ShoppingCart, Calendar, Users, CheckSquare, FileText, Layout, MessageSquare, HelpCircle, Mail, BarChart3, Palette, Shield, GraduationCap, UserCog, TrendingUp } from 'lucide-react';
 
 const Navbar = ({ children }) => {
     const { user, logout } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
     const [searchQuery, setSearchQuery] = useState('');
     const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [activeNav, setActiveNav] = useState('dashboard');
 
     const navItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: Grid3x3 },
-        { id: 'formation', label: 'Formation', icon: GraduationCap },
-        { id: 'gestion-utilisateurs', label: 'Gestion des utilisateurs', icon: UserCog },
-        { id: 'analyse', label: 'Analyse', icon: TrendingUp },
-        
+        { id: 'dashboard', label: 'Dashboard', icon: Grid3x3, path: '/' },
+        { id: 'formation', label: 'Formation', icon: GraduationCap, path: '/formations' },
+        { id: 'gestion-utilisateurs', label: 'Gestion des utilisateurs', icon: UserCog, path: '/users' },
+        { id: 'analyse', label: 'Analyse', icon: TrendingUp, path: '/analytics' },
     ];
+
+    const handleNavClick = (item) => {
+        navigate(item.path);
+    };
+
+    const getActiveNav = () => {
+        const currentPath = location.pathname;
+        const activeItem = navItems.find(item => item.path === currentPath);
+        return activeItem ? activeItem.id : 'dashboard';
+    };
+
+    const activeNav = getActiveNav();
 
     return (
         <div className="flex h-screen bg-gray-50">
@@ -25,15 +38,18 @@ const Navbar = ({ children }) => {
                     <div className="flex items-center justify-between">
                         {sidebarOpen ? (
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                                    <span className="text-white font-bold text-sm">TA</span>
-                                </div>
-                                <span className="font-bold text-xl text-gray-800">TailAdmin</span>
+                                <img 
+                                    src="/logo4.png" 
+                                    alt="Logo" 
+                                    className="w-60 h-20 object-contain"
+                                />
                             </div>
                         ) : (
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mx-auto">
-                                <span className="text-white font-bold text-sm">TA</span>
-                            </div>
+                            <img 
+                                src="/logo4.png" 
+                                alt="Logo" 
+                                className="w-30 h-50 object-contain mx-auto"
+                            />
                         )}
                         <button
                             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -55,7 +71,7 @@ const Navbar = ({ children }) => {
                             return (
                                 <button
                                     key={item.id}
-                                    onClick={() => setActiveNav(item.id)}
+                                    onClick={() => handleNavClick(item)}
                                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${
                                         isActive
                                             ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'

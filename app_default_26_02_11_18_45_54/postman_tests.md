@@ -94,7 +94,82 @@ Content-Type: application/json
 
 ---
 
-## 4. Test d'erreur (formation non trouvée)
+## 4. Ajouter des participants à une formation
+**Méthode:** POST  
+**URL:** `http://localhost:8080/api/training/{trainingId}/participants`
+
+**Headers:**
+```
+Content-Type: application/json
+```
+
+**Exemple d'URL:**
+```
+http://localhost:8080/api/training/1/participants
+```
+
+**Corps de la requête (Body):**
+```json
+[2, 3, 4]
+```
+
+**Réponse attendue (succès):**
+```json
+{
+    "message": "Participants ajoutés avec succès",
+    "training": {
+        "id": 1,
+        "title": "Formation Java Avancé",
+        "theme": "Développement",
+        "location": "Salle A",
+        "startDateTime": "2026-02-10T09:00:00",
+        "endDateTime": "2026-02-15T17:00:00",
+        "trainer": {
+            "id": 1,
+            "username": "formateur1",
+            "role": "TRAINER"
+        },
+        "participants": [
+            {
+                "id": 2,
+                "username": "participant1",
+                "role": "PARTICIPANT"
+            },
+            {
+                "id": 3,
+                "username": "participant2",
+                "role": "PARTICIPANT"
+            },
+            {
+                "id": 4,
+                "username": "participant3",
+                "role": "PARTICIPANT"
+            }
+        ]
+    },
+    "participantsCount": 3
+}
+```
+
+**Réponse attendue (erreur - formation non trouvée):**
+```json
+{
+    "error": "Formation non trouvée avec l'ID: 999",
+    "trainingId": 999
+}
+```
+
+**Réponse attendue (erreur - participants non trouvés):**
+```json
+{
+    "error": "Un ou plusieurs participants n'ont pas été trouvés",
+    "trainingId": 1
+}
+```
+
+---
+
+## 5. Test d'erreur (formation non trouvée)
 **Méthode:** GET  
 **URL:** `http://localhost:8080/api/training/999/status`
 
@@ -174,6 +249,34 @@ Vous pouvez importer cette configuration JSON dans Postman :
                     "host": ["localhost"],
                     "port": "8080",
                     "path": ["api", "training", "send-links-completed"]
+                }
+            }
+        },
+        {
+            "name": "Add Participants to Training",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "[2, 3, 4]",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "http://localhost:8080/api/training/1/participants",
+                    "protocol": "http",
+                    "host": ["localhost"],
+                    "port": "8080",
+                    "path": ["api", "training", "1", "participants"]
                 }
             }
         }

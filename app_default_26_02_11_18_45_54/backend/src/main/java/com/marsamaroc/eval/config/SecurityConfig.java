@@ -31,6 +31,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/training/send-links-completed").permitAll()
+                .requestMatchers("/api/rh/trainings").permitAll() // Temporary for testing
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/rh/**").hasAnyRole("ADMIN", "RH", "PARTICIPANT")
                 .requestMatchers("/questionnaire").permitAll()

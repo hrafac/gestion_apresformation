@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -59,6 +60,29 @@ public class TrainingController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
                 "error", "Erreur lors de l'envoi automatique des liens: " + e.getMessage()
+            ));
+        }
+    }
+
+    // Endpoint pour ajouter des participants à une formation
+    @PostMapping("/{trainingId}/participants")
+    public ResponseEntity<?> addParticipantsToTraining(@PathVariable Long trainingId, @RequestBody List<Long> participantIds) {
+        try {
+            var updatedTraining = trainingService.ajouterDesParticipantsDansUnFormation(trainingId, participantIds);
+            return ResponseEntity.ok(Map.of(
+                "message", "Participants ajoutés avec succès",
+                "training", updatedTraining,
+                "participantsCount", participantIds.size()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "error", e.getMessage(),
+                "trainingId", trainingId
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "error", "Erreur lors de l'ajout des participants: " + e.getMessage(),
+                "trainingId", trainingId
             ));
         }
     }
