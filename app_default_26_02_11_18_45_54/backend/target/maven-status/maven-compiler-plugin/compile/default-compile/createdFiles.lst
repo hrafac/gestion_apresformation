@@ -15,6 +15,7 @@ com\marsamaroc\eval\controllers\LoginRequest.class
 com\marsamaroc\eval\controllers\QuestionnaireController.class
 com\marsamaroc\eval\EvalApplication.class
 com\marsamaroc\eval\repositories\ResponseRepository.class
+com\marsamaroc\eval\scheduler\TrainingStatusScheduler.class
 com\marsamaroc\eval\dto\ResponseDTO.class
 com\marsamaroc\eval\config\JwtService.class
 com\marsamaroc\eval\entities\QuestionType.class

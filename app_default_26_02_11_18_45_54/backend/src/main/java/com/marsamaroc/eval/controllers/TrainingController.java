@@ -1,5 +1,7 @@
 package com.marsamaroc.eval.controllers;
 
+import com.marsamaroc.eval.entities.Training;
+import com.marsamaroc.eval.repositories.TrainingRepository;
 import com.marsamaroc.eval.services.TrainingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,16 @@ import java.util.Map;
 public class TrainingController {
     @Autowired
     private TrainingService trainingService;
+    
+    @Autowired
+    private TrainingRepository trainingRepository;
+
+    // Endpoint pour récupérer toutes les formations
+    @GetMapping
+    public ResponseEntity<List<Training>> getAllTrainings() {
+        List<Training> trainings = trainingRepository.findAll();
+        return ResponseEntity.ok(trainings);
+    }
 
     // Endpoint pour déclencher l'envoi du lien questionnaire à la fin de la formation
     @PostMapping("/{trainingId}/send-questionnaire-link")
@@ -83,6 +95,19 @@ public class TrainingController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
                 "error", "Erreur lors de l'ajout des participants: " + e.getMessage(),
                 "trainingId", trainingId
+            ));
+        }
+    }
+
+    // Endpoint pour déclencher manuellement la mise à jour des statuts
+    @PostMapping("/update-statuses")
+    public ResponseEntity<?> updateTrainingStatusesManually() {
+        try {
+            var result = trainingService.updateTrainingStatusesAutomatically();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "error", "Erreur lors de la mise à jour des statuts: " + e.getMessage()
             ));
         }
     }

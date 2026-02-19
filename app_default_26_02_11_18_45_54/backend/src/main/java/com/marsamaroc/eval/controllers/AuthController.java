@@ -52,6 +52,12 @@ public class AuthController {
         List<User> formateurs = userRepository.findByRole(Role.TRAINER);
         return ResponseEntity.ok(formateurs);
     }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return ResponseEntity.ok(users);
+    }
 }
 
 @Data

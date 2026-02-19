@@ -3,12 +3,14 @@ package com.marsamaroc.eval.services;
 import com.marsamaroc.eval.dto.TrainingDTO;
 import com.marsamaroc.eval.dto.UserShortDTO;
 import com.marsamaroc.eval.entities.Training;
+import com.marsamaroc.eval.entities.TrainingStatus;
 import com.marsamaroc.eval.entities.User;
 import com.marsamaroc.eval.repositories.TrainingRepository;
 import com.marsamaroc.eval.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -220,4 +222,51 @@ public class TrainingService {
                   // }
                   // À compléter avec injection des repositories et gestion d'erreur
             }
+
+    // Méthode automatique pour mettre à jour les statuts des formations
+    public Map<String, Object> updateTrainingStatusesAutomatically() {
+        LocalDateTime now = LocalDateTime.now();
+        int updatedToEnCours = 0;
+        int updatedToTermine = 0;
+        
+        // Récupérer les formations qui devraient être en cours mais ne le sont pas encore
+        List<Training> ongoingTrainings = trainingRepository.findOngoingTrainings(now);
+        
+        // Récupérer les formations qui sont terminées mais pas encore marquées comme telles
+        List<Training> completedTrainings = trainingRepository.findCompletedTrainingsNotUpdated(now);
+        
+        // Mettre à jour les formations en cours
+        for (Training training : ongoingTrainings) {
+            if (training.getStatus() == TrainingStatus.PAS_ENCORE) {
+                training.setStatus(TrainingStatus.EN_COURS);
+                trainingRepository.save(training);
+                updatedToEnCours++;
+                System.out.println("Formation '" + training.getTitle() + "' mise à jour: EN_COURS");
+            }
+        }
+        
+        // Mettre à jour les formations terminées
+        for (Training training : completedTrainings) {
+            training.setStatus(TrainingStatus.TERMINE);
+            trainingRepository.save(training);
+            updatedToTermine++;
+            System.out.println("Formation '" + training.getTitle() + "' mise à jour: TERMINE");
+            
+            // Envoyer automatiquement le lien du questionnaire aux participants
+            try {
+                sendQuestionnaireLinkToParticipants(training.getId());
+            } catch (Exception e) {
+                System.err.println("Erreur lors de l'envoi du questionnaire pour la formation '" + 
+                    training.getTitle() + "': " + e.getMessage());
+            }
+        }
+        
+        return Map.of(
+            "timestamp", now.toString(),
+            "updatedToEnCours", updatedToEnCours,
+            "updatedToTermine", updatedToTermine,
+            "totalUpdated", updatedToEnCours + updatedToTermine,
+            "message", "Mise à jour automatique des statuts terminée"
+        );
+    }
 }
