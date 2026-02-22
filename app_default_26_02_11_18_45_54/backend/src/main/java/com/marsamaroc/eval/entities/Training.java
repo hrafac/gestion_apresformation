@@ -20,11 +20,11 @@ public class Training {
     @ManyToOne(fetch = FetchType.EAGER)
     private User trainer;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "training_participants",
         joinColumns = @JoinColumn(name = "training_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
+        inverseJoinColumns = @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_training_participants_user"))
     )
     private Set<User> participants;
 

@@ -58,6 +58,40 @@ public class AuthController {
         List<User> users = userRepository.findAll();
         return ResponseEntity.ok(users);
     }
+
+    @PutMapping("/users/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        
+        user.setUsername(userDetails.getUsername());
+        user.setEmail(userDetails.getEmail());
+        user.setFullName(userDetails.getFullName());
+        user.setRole(userDetails.getRole());
+        
+        if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+        }
+        
+        User updatedUser = userRepository.save(user);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        
+        try {
+            // D'abord retirer l'utilisateur des formations
+            userRepository.removeUserFromTrainings(id);
+            // Puis supprimer l'utilisateur
+            userRepository.delete(user);
+            return ResponseEntity.ok("User deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erreur lors de la suppression: " + e.getMessage());
+        }
+    }
 }
 
 @Data
