@@ -83,13 +83,22 @@ public class AuthController {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
         
         try {
-            // D'abord retirer l'utilisateur des formations
+            // D'abord retirer l'utilisateur des formations en tant que participant
             userRepository.removeUserFromTrainings(id);
+            
+            // Ensuite, si l'utilisateur est formateur, le retirer des formations où il est trainer
+            userRepository.removeUserAsTrainer(id);
+            
+            // Forcer l'exécution immédiate des opérations ci-dessus
+            userRepository.flush();
+            
             // Puis supprimer l'utilisateur
             userRepository.delete(user);
+            userRepository.flush(); // Forcer l'exécution immédiate
+            
             return ResponseEntity.ok("User deleted successfully");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Erreur lors de la suppression: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Erreur lors de la suppression: " + e.getMessage() + ". L'utilisateur est probablement référencé dans d'autres tables.");
         }
     }
 }
