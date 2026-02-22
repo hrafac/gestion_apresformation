@@ -10,6 +10,12 @@ const UserManagement = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [editFormData, setEditFormData] = useState({
+        fullName: '',
+        email: '',
+        role: 'PARTICIPANT',
+        password: ''
+    });
 
     useEffect(() => {
         fetchUsers();
@@ -26,6 +32,76 @@ const UserManagement = () => {
             console.error('Error fetching users:', err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const updateUser = async (userId, userData) => {
+        try {
+            const response = await axios.put(`/auth/users/${userId}`, userData);
+            setUsers(users.map(user => 
+                user.id === userId ? response.data : user
+            ));
+            setShowEditModal(false);
+            setError('');
+            return true;
+        } catch (err) {
+            setError('Erreur lors de la mise à jour de l\'utilisateur');
+            console.error('Error updating user:', err);
+            return false;
+        }
+    };
+
+    const deleteUser = async (userId) => {
+        try {
+            await axios.delete(`/auth/users/${userId}`);
+            setUsers(users.filter(user => user.id !== userId));
+            setError('');
+            return true;
+        } catch (err) {
+            setError('Erreur lors de la suppression de l\'utilisateur');
+            console.error('Error deleting user:', err);
+            return false;
+        }
+    };
+
+    const handleEditUser = (user) => {
+        setSelectedUser(user);
+        setEditFormData({
+            fullName: user.fullName || '',
+            email: user.email || '',
+            role: user.role || 'PARTICIPANT',
+            password: ''
+        });
+        setShowEditModal(true);
+    };
+
+    const handleUpdateUser = async (e) => {
+        e.preventDefault();
+        if (!selectedUser) return;
+        
+        const updateData = {
+            fullName: editFormData.fullName,
+            email: editFormData.email,
+            role: editFormData.role
+        };
+        
+        if (editFormData.password.trim()) {
+            updateData.password = editFormData.password;
+        }
+        
+        const success = await updateUser(selectedUser.id, updateData);
+        if (success) {
+            setShowEditModal(false);
+            setSelectedUser(null);
+        }
+    };
+
+    const handleDeleteUser = async (userId) => {
+        if (window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.')) {
+            const success = await deleteUser(userId);
+            if (success) {
+                // L'utilisateur a été supprimé avec succès
+            }
         }
     };
 
@@ -177,16 +253,14 @@ const UserManagement = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div className="flex items-center gap-2">
                                             <button
-                                                onClick={() => {
-                                                    setSelectedUser(user);
-                                                    setShowEditModal(true);
-                                                }}
+                                                onClick={() => handleEditUser(user)}
                                                 className="text-blue-600 hover:text-blue-900 transition-colors"
                                                 title="Modifier"
                                             >
                                                 <Edit size={16} />
                                             </button>
                                             <button
+                                                onClick={() => handleDeleteUser(user.id)}
                                                 className="text-red-600 hover:text-red-900 transition-colors"
                                                 title="Supprimer"
                                             >
@@ -235,16 +309,17 @@ const UserManagement = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 w-full max-w-md">
                         <h2 className="text-xl font-bold mb-4">Modifier l'utilisateur</h2>
-                        <div className="space-y-4">
+                        <form onSubmit={handleUpdateUser} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Nom complet
                                 </label>
                                 <input
                                     type="text"
-                                    value={selectedUser.fullName || ''}
-                                    readOnly
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                                    value={editFormData.fullName}
+                                    onChange={(e) => setEditFormData({...editFormData, fullName: e.target.value})}
+                                    required
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </div>
                             <div>
@@ -253,34 +328,59 @@ const UserManagement = () => {
                                 </label>
                                 <input
                                     type="email"
-                                    value={selectedUser.email || ''}
-                                    readOnly
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                                    value={editFormData.email}
+                                    onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
+                                    required
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Rôle
                                 </label>
+                                <select
+                                    value={editFormData.role}
+                                    onChange={(e) => setEditFormData({...editFormData, role: e.target.value})}
+                                    required
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                    <option value="PARTICIPANT">Participant</option>
+                                    <option value="TRAINER">Formateur</option>
+                                    <option value="RH">RH</option>
+                                    <option value="ADMIN">Admin</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Nouveau mot de passe (optionnel)
+                                </label>
                                 <input
-                                    type="text"
-                                    value={selectedUser.role || ''}
-                                    readOnly
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                                    type="password"
+                                    value={editFormData.password}
+                                    onChange={(e) => setEditFormData({...editFormData, password: e.target.value})}
+                                    placeholder="Laisser vide pour ne pas modifier"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </div>
-                        </div>
-                        <p className="text-gray-600 mt-4">
-                            La fonctionnalité de modification sera bientôt disponible.
-                        </p>
-                        <div className="flex justify-end gap-2 mt-6">
-                            <button
-                                onClick={() => setShowEditModal(false)}
-                                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-                            >
-                                Fermer
-                            </button>
-                        </div>
+                            <div className="flex justify-end gap-2 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowEditModal(false);
+                                        setSelectedUser(null);
+                                    }}
+                                    className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                >
+                                    Enregistrer
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}
