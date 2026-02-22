@@ -269,4 +269,108 @@ public class TrainingService {
             "message", "Mise à jour automatique des statuts terminée"
         );
     }
+
+    // Créer une nouvelle formation
+    public TrainingDTO createTraining(Training training) {
+        // Valider les dates
+        if (training.getStartDate() == null || training.getEndDate() == null) {
+            throw new RuntimeException("Les dates de début et de fin sont obligatoires");
+        }
+        if (training.getStartDate().isAfter(training.getEndDate())) {
+            throw new RuntimeException("La date de début doit être antérieure à la date de fin");
+        }
+        if (training.getTitle() == null || training.getTitle().trim().isEmpty()) {
+            throw new RuntimeException("Le titre de la formation est obligatoire");
+        }
+        
+        // Définir le statut par défaut
+        if (training.getStatus() == null) {
+            training.setStatus(TrainingStatus.PAS_ENCORE);
+        }
+        
+        Training savedTraining = trainingRepository.save(training);
+        return toDTO(savedTraining);
+    }
+
+    // Mettre à jour une formation existante
+    public TrainingDTO updateTraining(Long trainingId, Training trainingDetails) {
+        Training existingTraining = trainingRepository.findById(trainingId)
+            .orElseThrow(() -> new RuntimeException("Formation non trouvée avec l'ID: " + trainingId));
+        
+        // Mettre à jour les champs
+        if (trainingDetails.getTitle() != null && !trainingDetails.getTitle().trim().isEmpty()) {
+            existingTraining.setTitle(trainingDetails.getTitle());
+        }
+        if (trainingDetails.getTheme() != null) {
+            existingTraining.setTheme(trainingDetails.getTheme());
+        }
+        if (trainingDetails.getLocation() != null) {
+            existingTraining.setLocation(trainingDetails.getLocation());
+        }
+        if (trainingDetails.getStartDate() != null) {
+            existingTraining.setStartDate(trainingDetails.getStartDate());
+        }
+        if (trainingDetails.getEndDate() != null) {
+            existingTraining.setEndDate(trainingDetails.getEndDate());
+        }
+        if (trainingDetails.getTrainer() != null) {
+            existingTraining.setTrainer(trainingDetails.getTrainer());
+        }
+        if (trainingDetails.getParticipants() != null) {
+            existingTraining.setParticipants(trainingDetails.getParticipants());
+        }
+        if (trainingDetails.getStatus() != null) {
+            existingTraining.setStatus(trainingDetails.getStatus());
+        }
+        
+        // Valider les dates après mise à jour
+        if (existingTraining.getStartDate().isAfter(existingTraining.getEndDate())) {
+            throw new RuntimeException("La date de début doit être antérieure à la date de fin");
+        }
+        
+        Training updatedTraining = trainingRepository.save(existingTraining);
+        return toDTO(updatedTraining);
+    }
+
+    // Supprimer une formation
+    public void deleteTraining(Long trainingId) {
+        Training training = trainingRepository.findById(trainingId)
+            .orElseThrow(() -> new RuntimeException("Formation non trouvée avec l'ID: " + trainingId));
+        
+        trainingRepository.delete(training);
+    }
+
+    // Récupérer une formation par son ID
+    public TrainingDTO getTrainingById(Long trainingId) {
+        Training training = trainingRepository.findById(trainingId)
+            .orElseThrow(() -> new RuntimeException("Formation non trouvée avec l'ID: " + trainingId));
+        return toDTO(training);
+    }
+
+    // Méthode pour supprimer un participant d'une formation
+    public TrainingDTO removeParticipantFromTraining(Long trainingId, Long participantId) {
+        Training training = trainingRepository.findById(trainingId)
+            .orElseThrow(() -> new RuntimeException("Formation non trouvée avec l'ID: " + trainingId));
+        
+        // Vérifier si la formation a des participants
+        if (training.getParticipants() == null || training.getParticipants().isEmpty()) {
+            throw new RuntimeException("Aucun participant trouvé dans cette formation");
+        }
+        
+        // Vérifier si le participant existe dans la formation
+        boolean participantExists = training.getParticipants().stream()
+            .anyMatch(participant -> participant.getId().equals(participantId));
+        
+        if (!participantExists) {
+            throw new RuntimeException("Participant avec l'ID " + participantId + " non trouvé dans cette formation");
+        }
+        
+        // Supprimer le participant
+        training.getParticipants().removeIf(participant -> participant.getId().equals(participantId));
+        
+        // Sauvegarder la formation mise à jour
+        Training updatedTraining = trainingRepository.save(training);
+        
+        return toDTO(updatedTraining);
+    }
 }

@@ -9,6 +9,8 @@ const Formation = () => {
     const [showModal, setShowModal] = useState(false);
     const [showParticipantModal, setShowParticipantModal] = useState(false);
     const [showViewParticipantsModal, setShowViewParticipantsModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [selectedTraining, setSelectedTraining] = useState(null);
     const [selectedParticipants, setSelectedParticipants] = useState([]);
     const [formData, setFormData] = useState({
@@ -122,6 +124,134 @@ const Formation = () => {
                 return [...prev, participantId];
             }
         });
+    };
+
+    const handleDeleteTraining = (training) => {
+        setSelectedTraining(training);
+        setShowDeleteModal(true);
+    };
+
+    const handleEditTraining = (training) => {
+        setSelectedTraining(training);
+        
+        // Gestion robuste des dates
+        const formatDateTimeLocal = (dateString) => {
+            if (!dateString) return '';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return '';
+                return date.toISOString().slice(0, 16);
+            } catch (error) {
+                return '';
+            }
+        };
+        
+        setFormData({
+            title: training.title || '',
+            theme: training.theme || '',
+            location: training.location || '',
+            startDate: formatDateTimeLocal(training.startDate),
+            endDate: formatDateTimeLocal(training.endDate),
+            trainer: training.trainer ? { id: training.trainer.id } : { id: 1 },
+            participants: training.participants || []
+        });
+        setShowEditModal(true);
+    };
+
+    const handleUpdateTraining = async (e) => {
+        e.preventDefault();
+        try {
+            console.log('Updating training ID:', selectedTraining.id);
+            console.log('Update data:', formData);
+            
+            await api.put(`/training/${selectedTraining.id}`, formData);
+            
+            setShowEditModal(false);
+            setSelectedTraining(null);
+            setFormData({
+                title: '',
+                theme: '',
+                location: '',
+                startDate: '',
+                endDate: '',
+                trainer: { id: 1 },
+                participants: []
+            });
+            fetchTrainings();
+        } catch (error) {
+            console.error('Error updating training:', error);
+            console.error('Error response:', error.response);
+            
+            if (error.response?.status === 403) {
+                alert('Erreur 403: Vous n\'avez pas les permissions pour modifier cette formation.');
+            } else if (error.response?.status === 401) {
+                alert('Erreur 401: Votre session a expiré. Veuillez vous reconnecter.');
+            } else if (error.response?.status === 404) {
+                alert('Erreur 404: Formation non trouvée.');
+            } else {
+                alert(`Erreur lors de la modification: ${error.response?.data?.error || error.message}`);
+            }
+        }
+    };
+
+    const handleConfirmDelete = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            console.log('Token:', token); // Debug token
+            console.log('Deleting training ID:', selectedTraining.id); // Debug ID
+            
+            await api.delete(`/training/${selectedTraining.id}`);
+            
+            setShowDeleteModal(false);
+            setSelectedTraining(null);
+            fetchTrainings();
+        } catch (error) {
+            console.error('Error deleting training:', error);
+            console.error('Error response:', error.response); // Debug response
+            
+            if (error.response?.status === 403) {
+                alert('Erreur 403: Vous n\'avez pas les permissions pour supprimer une formation. Vérifiez que vous êtes bien connecté avec un compte autorisé.');
+            } else if (error.response?.status === 401) {
+                alert('Erreur 401: Votre session a expiré. Veuillez vous reconnecter.');
+            } else if (error.response?.status === 404) {
+                alert('Erreur 404: Formation non trouvée.');
+            } else {
+                alert(`Erreur lors de la suppression: ${error.response?.data?.error || error.message}`);
+            }
+        }
+    };
+
+    const handleRemoveParticipant = async (trainingId, participantId) => {
+        try {
+            const token = localStorage.getItem('token');
+            console.log('Token:', token);
+            console.log('Removing participant:', participantId, 'from training:', trainingId);
+            
+            await api.delete(`/training/${trainingId}/participants/${participantId}`);
+            
+            // Rafraîchir les données
+            fetchTrainings();
+            // Mettre à jour la formation sélectionnée si la modal est ouverte
+            if (selectedTraining && selectedTraining.id === trainingId) {
+                setSelectedTraining(prev => ({
+                    ...prev,
+                    participants: prev.participants.filter(p => p.id !== participantId)
+                }));
+            }
+        } catch (error) {
+            console.error('Error removing participant:', error);
+            console.error('Error response:', error.response);
+            
+            if (error.response?.status === 403) {
+                alert('Erreur 403: Vous n\'avez pas les permissions pour supprimer ce participant.');
+            } else if (error.response?.status === 401) {
+                alert('Erreur 401: Votre session a expiré. Veuillez vous reconnecter.');
+            } else if (error.response?.status === 404) {
+                alert('Erreur 404: Participant ou formation non trouvé.');
+            } else {
+                alert(`Erreur lors de la suppression du participant: ${error.response?.data?.error || error.message}`);
+            }
+        }
     };
 
     return (
@@ -293,35 +423,12 @@ const Formation = () => {
                                         </div>
                                     </div>
                                     
-                                    {/* Dates */}
-                                    <div className="flex items-start">
-                                        <div className="relative">
-                                            <div className="absolute inset-0 bg-blue-200 rounded-xl blur-lg opacity-50"></div>
-                                            <div className="relative bg-gradient-to-br from-blue-400 to-blue-500 p-3 rounded-xl">
-                                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
-                                            </div>
-                                        </div>
-                                        <div className="ml-4 flex-1">
-                                            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Période</p>
-                                            <p className="text-sm text-gray-800 font-medium">
-                                                {new Date(training.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                                {' - '}
-                                                {new Date(training.endDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    
                                     {/* Trainer Info */}
-                                    <div className="flex items-start">
-                                        <div className="relative">
-                                            <div className="absolute inset-0 bg-blue-200 rounded-xl blur-lg opacity-50"></div>
-                                            <div className="relative bg-gradient-to-br from-blue-400 to-blue-500 p-3 rounded-xl">
-                                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                </svg>
-                                            </div>
+                                    <div className="flex items-center">
+                                        <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center border border-blue-300">
+                                            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
                                         </div>
                                         <div className="ml-4 flex-1">
                                             <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Formateur</p>
@@ -332,8 +439,8 @@ const Formation = () => {
                                     </div>
                                 </div>
                                 
-                                {/* Action Button */}
-                                <div className="mt-6">
+                                {/* Action Buttons */}
+                                <div className="mt-6 space-y-3">
                                     <button 
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -348,6 +455,38 @@ const Formation = () => {
                                         </svg>
                                         <span className="relative z-10">Gérer les participants</span>
                                     </button>
+                                    
+                                    <div className="flex space-x-2">
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleEditTraining(training);
+                                            }}
+                                            className="flex-1 group relative bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 text-white px-4 py-3 rounded-2xl font-bold hover:shadow-2xl hover:shadow-emerald-500/25 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center overflow-hidden"
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+                                            <svg className="w-4 h-4 mr-2 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                            <span className="relative z-10">Modifier</span>
+                                        </button>
+                                        
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteTraining(training);
+                                            }}
+                                            className="flex-1 group relative bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white px-4 py-3 rounded-2xl font-bold hover:shadow-2xl hover:shadow-red-500/25 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center overflow-hidden"
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-red-700 to-red-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+                                            <svg className="w-4 h-4 mr-2 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            <span className="relative z-10">Supprimer</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -380,6 +519,268 @@ const Formation = () => {
                             </svg>
                             <span className="relative z-10">Créer votre première formation</span>
                         </button>
+                    </div>
+                )}
+
+                {/* Edit Formation Modal */}
+                {showEditModal && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-xl flex items-center justify-center z-50 p-4 animate-fade-in">
+                        <div className="relative bg-white rounded-3xl shadow-2xl max-w-2xl w-full transform transition-all duration-500 scale-100 border border-gray-200 animate-scale-in">
+                            {/* Modal Header */}
+                            <div className="relative bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 px-8 py-6 rounded-t-3xl border-b border-gray-200">
+                                <div className="absolute top-0 right-0 w-40 h-40 bg-white opacity-10 rounded-full -mr-20 -mt-20"></div>
+                                <div className="absolute bottom-0 left-0 w-32 h-32 bg-white opacity-10 rounded-full -ml-16 -mb-16"></div>
+                                <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-white opacity-10 rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
+                                <h2 className="relative text-2xl font-black text-white">Modifier la Formation</h2>
+                                <p className="relative text-emerald-100 text-sm mt-1">Mettez à jour les informations de la formation</p>
+                            </div>
+                            
+                            {/* Modal Body */}
+                            <div className="p-8">
+                                <form onSubmit={handleUpdateTraining} className="space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-800 mb-3 flex items-center">
+                                            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center mr-3">
+                                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            Titre de la formation
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="title"
+                                            value={formData.title}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="Ex: Formation Java Avancé"
+                                            className="w-full px-4 py-4 bg-gray-50 border border-gray-300 rounded-2xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-800 mb-3 flex items-center">
+                                            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center mr-3">
+                                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                                </svg>
+                                            </div>
+                                            Thème
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="theme"
+                                            value={formData.theme}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="Ex: Développement Backend"
+                                            className="w-full px-4 py-4 bg-gray-50 border border-gray-300 rounded-2xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-800 mb-3 flex items-center">
+                                            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center mr-3">
+                                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                            </div>
+                                            Lieu
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="location"
+                                            value={formData.location}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="Ex: Salle B"
+                                            className="w-full px-4 py-4 bg-gray-50 border border-gray-300 rounded-2xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300"
+                                        />
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-800 mb-3 flex items-center">
+                                                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center mr-3">
+                                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                </div>
+                                                Date de début
+                                            </label>
+                                            <input
+                                                type="datetime-local"
+                                                name="startDate"
+                                                value={formData.startDate}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full px-4 py-4 bg-gray-50 border border-gray-300 rounded-2xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-800 mb-3 flex items-center">
+                                                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center mr-3">
+                                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                </div>
+                                                Date de fin
+                                            </label>
+                                            <input
+                                                type="datetime-local"
+                                                name="endDate"
+                                                value={formData.endDate}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full px-4 py-4 bg-gray-50 border border-gray-300 rounded-2xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-800 mb-3 flex items-center">
+                                            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center mr-3">
+                                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
+                                            </div>
+                                            Formateur
+                                        </label>
+                                        <select
+                                            name="trainer"
+                                            value={formData.trainer.id}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full px-4 py-4 bg-gray-50 border border-gray-300 rounded-2xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300"
+                                        >
+                                            <option value="" className="bg-white">Sélectionner un formateur</option>
+                                            {trainers.map(trainer => (
+                                                <option key={trainer.id} value={trainer.id} className="bg-white">
+                                                    {trainer.fullName}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    
+                                    <div className="flex space-x-4 pt-8">
+                                        <button
+                                            type="submit"
+                                            className="flex-1 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 text-white py-4 rounded-2xl font-bold hover:shadow-2xl hover:shadow-emerald-500/25 transform hover:-translate-y-1 transition-all duration-500"
+                                        >
+                                            Mettre à jour la formation
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowEditModal(false);
+                                                setSelectedTraining(null);
+                                                setFormData({
+                                                    title: '',
+                                                    theme: '',
+                                                    location: '',
+                                                    startDate: '',
+                                                    endDate: '',
+                                                    trainer: { id: 1 },
+                                                    participants: []
+                                                });
+                                            }}
+                                            className="flex-1 bg-gray-100 text-gray-800 py-4 rounded-2xl font-bold hover:bg-gray-200 transition-all duration-300 border border-gray-300"
+                                        >
+                                            Annuler
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Delete Confirmation Modal */}
+                {showDeleteModal && selectedTraining && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-xl flex items-center justify-center z-50 p-4 animate-fade-in">
+                        <div className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full transform transition-all duration-500 scale-100 border border-gray-200 animate-scale-in">
+                            {/* Modal Header */}
+                            <div className="relative bg-gradient-to-r from-red-500 via-red-600 to-red-700 px-8 py-6 rounded-t-3xl border-b border-gray-200">
+                                <div className="absolute top-0 right-0 w-40 h-40 bg-white opacity-10 rounded-full -mr-20 -mt-20"></div>
+                                <div className="absolute bottom-0 left-0 w-32 h-32 bg-white opacity-10 rounded-full -ml-16 -mb-16"></div>
+                                <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-white opacity-10 rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
+                                <h2 className="relative text-2xl font-black text-white">Supprimer la Formation</h2>
+                                <p className="relative text-red-100 text-sm mt-1">Cette action est irréversible</p>
+                            </div>
+                            
+                            {/* Modal Body */}
+                            <div className="p-8">
+                                <div className="text-center mb-8">
+                                    <div className="relative inline-block mb-6">
+                                        <div className="absolute inset-0 bg-red-200 rounded-full blur-2xl opacity-50 animate-pulse"></div>
+                                        <div className="relative w-20 h-20 bg-red-100 rounded-full flex items-center justify-center border-4 border-red-200">
+                                            <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    
+                                    <h3 className="text-xl font-bold text-gray-800 mb-3">
+                                        Êtes-vous sûr de vouloir supprimer cette formation ?
+                                    </h3>
+                                    
+                                    <div className="bg-gray-50 rounded-2xl p-4 mb-6 text-left">
+                                        <p className="text-sm font-semibold text-gray-600 mb-2">Formation à supprimer :</p>
+                                        <p className="text-lg font-bold text-gray-800">{selectedTraining.title}</p>
+                                        <p className="text-sm text-gray-500 mt-1">{selectedTraining.theme}</p>
+                                        <p className="text-sm text-gray-500">
+                                            {new Date(selectedTraining.startDate).toLocaleDateString('fr-FR', { 
+                                                day: 'numeric', 
+                                                month: 'short', 
+                                                year: 'numeric' 
+                                            })} - {new Date(selectedTraining.endDate).toLocaleDateString('fr-FR', { 
+                                                day: 'numeric', 
+                                                month: 'short', 
+                                                year: 'numeric' 
+                                            })}
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
+                                        <div className="flex items-start">
+                                            <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                            </svg>
+                                            <div className="text-left">
+                                                <p className="text-sm font-semibold text-red-800 mb-1">Attention :</p>
+                                                <p className="text-sm text-red-700">
+                                                    Cette action supprimera définitivement la formation et toutes les données associées. 
+                                                    Cette action ne peut pas être annulée.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex space-x-4">
+                                    <button
+                                        onClick={handleConfirmDelete}
+                                        className="flex-1 bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white py-4 rounded-2xl font-bold hover:shadow-2xl hover:shadow-red-500/25 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center"
+                                    >
+                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        Oui, supprimer
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowDeleteModal(false);
+                                            setSelectedTraining(null);
+                                        }}
+                                        className="flex-1 bg-gray-100 text-gray-800 py-4 rounded-2xl font-bold hover:bg-gray-200 transition-all duration-300 border border-gray-300"
+                                    >
+                                        Annuler
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -768,8 +1169,26 @@ const Formation = () => {
                                                         <p className="text-sm font-bold text-gray-800">{participant.username}</p>
                                                         <p className="text-xs text-gray-500 capitalize">{participant.role.toLowerCase()}</p>
                                                     </div>
-                                                    <div className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full border border-blue-200">
-                                                        Participant
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full border border-blue-200">
+                                                            Participant
+                                                        </div>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${participant.username} de cette formation ?`)) {
+                                                                    handleRemoveParticipant(selectedTraining.id, participant.id);
+                                                                }
+                                                            }}
+                                                            className="group relative bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white p-2 rounded-xl hover:shadow-2xl hover:shadow-red-500/25 transform hover:-translate-y-1 transition-all duration-500"
+                                                            title="Supprimer le participant"
+                                                        >
+                                                            <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-red-700 to-red-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                                            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+                                                            <svg className="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            </svg>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             ))
