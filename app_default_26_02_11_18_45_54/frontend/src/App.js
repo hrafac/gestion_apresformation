@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Register from './pages/Register';
 import Formation from './pages/Formation';
+import UserManagement from './pages/UserManagement';
 
 const PrivateRoute = ({ children }) => {
     const { user } = useAuth();
@@ -27,6 +28,11 @@ function App() {
                     <Route path="/formations" element={
                         <PrivateRoute>
                             <Formation />
+                        </PrivateRoute>
+                    } />
+                    <Route path="/users" element={
+                        <PrivateRoute>
+                            <UserManagement />
                         </PrivateRoute>
                     } />
                 </Routes>
