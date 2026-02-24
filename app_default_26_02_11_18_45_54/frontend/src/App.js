@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Formation from './pages/Formation';
 import UserManagement from './pages/UserManagement';
 import Questionnaire from './pages/Questionnaire';
+import MesFormations from './pages/MesFormations';
 
 const PrivateRoute = ({ children }) => {
     const { user } = useAuth();
@@ -29,6 +30,11 @@ function App() {
                     <Route path="/formations" element={
                         <PrivateRoute>
                             <Formation />
+                        </PrivateRoute>
+                    } />
+                    <Route path="/mes-formations" element={
+                        <PrivateRoute>
+                            <MesFormations />
                         </PrivateRoute>
                     } />
                     <Route path="/users" element={

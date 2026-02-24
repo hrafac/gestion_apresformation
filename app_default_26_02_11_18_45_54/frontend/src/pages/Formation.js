@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 import '../styles/formation.css';
 
 const Formation = () => {
+    const { user } = useAuth();
     const [trainings, setTrainings] = useState([]);
     const [trainers, setTrainers] = useState([]);
     const [participants, setParticipants] = useState([]);
@@ -269,29 +271,34 @@ const Formation = () => {
                                 <div className="relative">
                                     <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full blur-lg opacity-75 animate-pulse"></div>
                                     <div className="relative bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full border border-blue-400">
-                                        SYSTEM ACTIVE
+                                        {user?.role === 'PARTICIPANT' ? 'PARTICIPANT' : 'SYSTEM ACTIVE'}
                                     </div>
                                 </div>
                             </div>
                             <h1 className="text-5xl font-black bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 bg-clip-text text-transparent leading-tight">
-                                Gestion des Formations
+                                {user?.role === 'PARTICIPANT' ? 'Mes Formations' : 'Gestion des Formations'}
                             </h1>
-                            <p className="text-gray-600 text-lg">Plateforme de gestion des programmes de développement</p>
+                            <p className="text-gray-600 text-lg">
+                                {user?.role === 'PARTICIPANT' ? 'Découvrez les formations disponibles' : 'Plateforme de gestion des programmes de développement'}
+                            </p>
                         </div>
-                        <button
-                            onClick={() => setShowModal(true)}
-                            className="group relative bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white px-8 py-4 rounded-2xl font-bold shadow-2xl hover:shadow-blue-500/25 transform hover:-translate-y-2 transition-all duration-500 flex items-center overflow-hidden"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
-                            <svg className="w-5 h-5 mr-3 relative z-10 group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span className="relative z-10">Nouvelle Formation</span>
-                        </button>
+                        {user?.role !== 'PARTICIPANT' && (
+                            <button
+                                onClick={() => setShowModal(true)}
+                                className="group relative bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white px-8 py-4 rounded-2xl font-bold shadow-2xl hover:shadow-blue-500/25 transform hover:-translate-y-2 transition-all duration-500 flex items-center overflow-hidden"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+                                <svg className="w-5 h-5 mr-3 relative z-10 group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span className="relative z-10">Nouvelle Formation</span>
+                            </button>
+                        )}
                     </div>
                     
-                    {/* Stats Cards */}
+                    {user?.role !== 'PARTICIPANT' && (
+                    /* Stats Cards */
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="relative bg-white border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
                             <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
@@ -347,19 +354,28 @@ const Formation = () => {
                             </div>
                         </div>
                     </div>
+                )}
                 </div>
 
                 {/* Formation Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <div className={`${user?.role === 'PARTICIPANT' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8'}`}>
                     {trainings.map((training, index) => (
                         <div 
                             key={training.id} 
-                            className="group relative bg-white border border-gray-200 rounded-3xl shadow-lg overflow-hidden transition-all duration-700 hover:-translate-y-3 hover:shadow-blue-500/20 hover:border-blue-300 animate-fade-in-up cursor-pointer"
+                            className={`group relative overflow-hidden transition-all duration-700 animate-fade-in-up cursor-pointer ${
+                                user?.role === 'PARTICIPANT' 
+                                    ? 'bg-white border-2 border-blue-200 rounded-2xl shadow-lg hover:shadow-blue-400/30 hover:border-blue-400 hover:-translate-y-2' 
+                                    : 'bg-white border border-gray-200 rounded-3xl shadow-lg hover:-translate-y-3 hover:shadow-blue-500/20 hover:border-blue-300'
+                            }`}
                             style={{ animationDelay: `${index * 100}ms` }}
                             onClick={() => handleViewParticipants(training)}
                         >
                             {/* Glow Effect on Hover */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+                            <div className={`absolute inset-0 transition-opacity duration-500 ${
+                                user?.role === 'PARTICIPANT'
+                                    ? 'bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 opacity-0 group-hover:opacity-100 rounded-2xl'
+                                    : 'bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 opacity-0 group-hover:opacity-100 rounded-3xl'
+                            }`}></div>
                             
                             {/* Geometric Pattern Background */}
                             <div className="absolute inset-0 opacity-5">
@@ -369,15 +385,25 @@ const Formation = () => {
                             {/* Status Badge */}
                             <div className="absolute top-4 right-4 z-20">
                                 <div className="relative">
-                                    <div className="absolute inset-0 bg-blue-200 rounded-full blur-lg animate-pulse"></div>
-                                    <span className="relative bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full border border-blue-400">
-                                        ACTIVE
+                                    <div className={`absolute inset-0 rounded-full blur-lg animate-pulse ${
+                                        user?.role === 'PARTICIPANT' ? 'bg-blue-300' : 'bg-blue-200'
+                                    }`}></div>
+                                    <span className={`relative text-xs font-bold px-3 py-1 rounded-full border ${
+                                        user?.role === 'PARTICIPANT'
+                                            ? 'bg-blue-500 text-white border-blue-400'
+                                            : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400'
+                                    }`}>
+                                        {user?.role === 'PARTICIPANT' ? 'DISPONIBLE' : 'ACTIVE'}
                                     </span>
                                 </div>
                             </div>
                             
                             {/* Card Header */}
-                            <div className="relative h-40 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 p-6 overflow-hidden">
+                            <div className={`relative h-40 p-6 overflow-hidden ${
+                                user?.role === 'PARTICIPANT'
+                                    ? 'bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600'
+                                    : 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700'
+                            }`}>
                                 <div className="absolute inset-0 bg-black opacity-10"></div>
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-white opacity-10 rounded-full -mr-20 -mt-20"></div>
                                 <div className="absolute bottom-0 left-0 w-32 h-32 bg-white opacity-10 rounded-full -ml-16 -mb-16"></div>
@@ -393,8 +419,14 @@ const Formation = () => {
                                     {/* Theme */}
                                     <div className="flex items-start">
                                         <div className="relative">
-                                            <div className="absolute inset-0 bg-blue-200 rounded-xl blur-lg opacity-50"></div>
-                                            <div className="relative bg-gradient-to-br from-blue-400 to-blue-500 p-3 rounded-xl">
+                                            <div className={`absolute inset-0 rounded-xl blur-lg opacity-50 ${
+                                                user?.role === 'PARTICIPANT' ? 'bg-blue-200' : 'bg-blue-200'
+                                            }`}></div>
+                                            <div className={`relative p-3 rounded-xl ${
+                                                user?.role === 'PARTICIPANT'
+                                                    ? 'bg-blue-400'
+                                                    : 'bg-gradient-to-br from-blue-400 to-blue-500'
+                                            }`}>
                                                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                                 </svg>
@@ -409,8 +441,14 @@ const Formation = () => {
                                     {/* Location */}
                                     <div className="flex items-start">
                                         <div className="relative">
-                                            <div className="absolute inset-0 bg-blue-200 rounded-xl blur-lg opacity-50"></div>
-                                            <div className="relative bg-gradient-to-br from-blue-400 to-blue-500 p-3 rounded-xl">
+                                            <div className={`absolute inset-0 rounded-xl blur-lg opacity-50 ${
+                                                user?.role === 'PARTICIPANT' ? 'bg-blue-200' : 'bg-blue-200'
+                                            }`}></div>
+                                            <div className={`relative p-3 rounded-xl ${
+                                                user?.role === 'PARTICIPANT'
+                                                    ? 'bg-blue-400'
+                                                    : 'bg-gradient-to-br from-blue-400 to-blue-500'
+                                            }`}>
                                                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -425,8 +463,14 @@ const Formation = () => {
                                     
                                     {/* Trainer Info */}
                                     <div className="flex items-center">
-                                        <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center border border-blue-300">
-                                            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${
+                                            user?.role === 'PARTICIPANT'
+                                                ? 'bg-blue-100 border-blue-300'
+                                                : 'bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300'
+                                        }`}>
+                                            <svg className={`w-5 h-5 ${
+                                                user?.role === 'PARTICIPANT' ? 'text-blue-600' : 'text-blue-600'
+                                            }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
                                         </div>
@@ -441,52 +485,70 @@ const Formation = () => {
                                 
                                 {/* Action Buttons */}
                                 <div className="mt-6 space-y-3">
-                                    <button 
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleAddParticipant(training);
-                                        }}
-                                        className="w-full group relative bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white px-4 py-3 rounded-2xl font-bold hover:shadow-2xl hover:shadow-blue-500/25 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center overflow-hidden"
-                                    >
-                                        <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-blue-800 to-blue-900 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                        <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
-                                        <svg className="w-4 h-4 mr-2 relative z-10 group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                        </svg>
-                                        <span className="relative z-10">Gérer les participants</span>
-                                    </button>
-                                    
-                                    <div className="flex space-x-2">
+                                    {user?.role === 'PARTICIPANT' ? (
                                         <button 
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleEditTraining(training);
+                                                handleViewParticipants(training);
                                             }}
-                                            className="flex-1 group relative bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 text-white px-4 py-3 rounded-2xl font-bold hover:shadow-2xl hover:shadow-emerald-500/25 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center overflow-hidden"
+                                            className="w-full group relative bg-blue-500 text-white px-4 py-3 rounded-2xl font-bold hover:shadow-lg hover:shadow-blue-400/30 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center"
                                         >
-                                            <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
-                                            <svg className="w-4 h-4 mr-2 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            <svg className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
-                                            <span className="relative z-10">Modifier</span>
+                                            <span>Voir les détails</span>
                                         </button>
-                                        
-                                        <button 
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDeleteTraining(training);
-                                            }}
-                                            className="flex-1 group relative bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white px-4 py-3 rounded-2xl font-bold hover:shadow-2xl hover:shadow-red-500/25 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center overflow-hidden"
-                                        >
-                                            <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-red-700 to-red-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
-                                            <svg className="w-4 h-4 mr-2 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                            <span className="relative z-10">Supprimer</span>
-                                        </button>
-                                    </div>
+                                    ) : (
+                                        <>
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleAddParticipant(training);
+                                                }}
+                                                className="w-full group relative bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white px-4 py-3 rounded-2xl font-bold hover:shadow-2xl hover:shadow-blue-500/25 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center overflow-hidden"
+                                            >
+                                                <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-blue-800 to-blue-900 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+                                                <svg className="w-4 h-4 mr-2 relative z-10 group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                </svg>
+                                                <span className="relative z-10">Gérer les participants</span>
+                                            </button>
+                                            
+                                            <div className="flex space-x-2">
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleEditTraining(training);
+                                                    }}
+                                                    className="flex-1 group relative bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 text-white px-4 py-3 rounded-2xl font-bold hover:shadow-2xl hover:shadow-emerald-500/25 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center overflow-hidden"
+                                                >
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+                                                    <svg className="w-4 h-4 mr-2 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                    <span className="relative z-10">Modifier</span>
+                                                </button>
+                                                
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteTraining(training);
+                                                    }}
+                                                    className="flex-1 group relative bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white px-4 py-3 rounded-2xl font-bold hover:shadow-2xl hover:shadow-red-500/25 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center overflow-hidden"
+                                                >
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-red-700 to-red-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+                                                    <svg className="w-4 h-4 mr-2 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                    <span className="relative z-10">Supprimer</span>
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -497,28 +559,41 @@ const Formation = () => {
                 {trainings.length === 0 && (
                     <div className="text-center py-32">
                         <div className="relative inline-block mb-8">
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-200 via-blue-300 to-blue-200 rounded-full blur-3xl opacity-40 scale-150 animate-pulse"></div>
+                            <div className={`absolute inset-0 rounded-full blur-3xl opacity-40 scale-150 animate-pulse ${
+                                user?.role === 'PARTICIPANT'
+                                    ? 'bg-gradient-to-r from-blue-200 via-blue-300 to-blue-200'
+                                    : 'bg-gradient-to-r from-blue-200 via-blue-300 to-blue-200'
+                            }`}></div>
                             <div className="relative bg-white border border-gray-200 rounded-full p-12 shadow-lg">
-                                <svg className="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className={`w-24 h-24 ${
+                                    user?.role === 'PARTICIPANT' ? 'text-blue-400' : 'text-gray-400'
+                                }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                 </svg>
                             </div>
                         </div>
-                        <h3 className="text-3xl font-black text-gray-800 mb-4">Aucune formation trouvée</h3>
+                        <h3 className="text-3xl font-black text-gray-800 mb-4">
+                            {user?.role === 'PARTICIPANT' ? 'Aucune formation disponible' : 'Aucune formation trouvée'}
+                        </h3>
                         <p className="text-gray-600 text-lg mb-12 max-w-md mx-auto">
-                            Lancez votre première formation et commencez à développer les compétences de vos équipes
+                            {user?.role === 'PARTICIPANT'
+                                ? 'Revenez plus tard pour découvrir de nouvelles formations'
+                                : 'Lancez votre première formation et commencez à développer les compétences de vos équipes'
+                            }
                         </p>
-                        <button
-                            onClick={() => setShowModal(true)}
-                            className="group relative bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white px-10 py-4 rounded-2xl font-bold shadow-2xl hover:shadow-blue-500/25 transform hover:-translate-y-2 transition-all duration-500 inline-flex items-center"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
-                            <svg className="w-5 h-5 mr-3 relative z-10 group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span className="relative z-10">Créer votre première formation</span>
-                        </button>
+                        {user?.role !== 'PARTICIPANT' && (
+                            <button
+                                onClick={() => setShowModal(true)}
+                                className="group relative bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white px-10 py-4 rounded-2xl font-bold shadow-2xl hover:shadow-blue-500/25 transform hover:-translate-y-2 transition-all duration-500 inline-flex items-center"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+                                <svg className="w-5 h-5 mr-3 relative z-10 group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span className="relative z-10">Créer votre première formation</span>
+                            </button>
+                        )}
                     </div>
                 )}
 
@@ -1140,6 +1215,7 @@ const Formation = () => {
                                     </div>
                                 </div>
 
+                                {user?.role !== 'PARTICIPANT' && (
                                 <div>
                                     <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
                                         <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
@@ -1208,6 +1284,7 @@ const Formation = () => {
                                         )}
                                     </div>
                                 </div>
+                                )}
                                 
                                 <div className="flex space-x-4 pt-8">
                                     <button

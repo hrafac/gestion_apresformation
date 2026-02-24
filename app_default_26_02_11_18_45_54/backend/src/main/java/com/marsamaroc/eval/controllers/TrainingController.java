@@ -1,5 +1,6 @@
 package com.marsamaroc.eval.controllers;
 
+import com.marsamaroc.eval.dto.TrainingDTO;
 import com.marsamaroc.eval.entities.Training;
 import com.marsamaroc.eval.repositories.TrainingRepository;
 import com.marsamaroc.eval.services.TrainingService;
@@ -213,6 +214,29 @@ public class TrainingController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
                 "error", "Erreur lors de la mise à jour des statuts: " + e.getMessage()
+            ));
+        }
+    }
+
+    // Endpoint pour récupérer les formations par participant
+    @GetMapping("/participant/{participantId}")
+    public ResponseEntity<?> getFormationsByParticipant(@PathVariable Long participantId) {
+        try {
+            List<TrainingDTO> formations = trainingService.getFormationsByParticipant(participantId);
+            return ResponseEntity.ok(Map.of(
+                "participantId", participantId,
+                "formations", formations,
+                "count", formations.size()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "error", e.getMessage(),
+                "participantId", participantId
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "error", "Erreur lors de la récupération des formations du participant: " + e.getMessage(),
+                "participantId", participantId
             ));
         }
     }

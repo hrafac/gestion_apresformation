@@ -39,7 +39,13 @@ const Login = () => {
         try {
             const res = await api.post('/auth/login', credentials);
             login(res.data.user, res.data.token);
-            navigate('/');
+            
+            // Navigate based on user role
+            if (res.data.user.role === 'PARTICIPANT') {
+                navigate('/formations');
+            } else {
+                navigate('/');
+            }
         } catch (err) {
             alert('Identifiants invalides');
         }
