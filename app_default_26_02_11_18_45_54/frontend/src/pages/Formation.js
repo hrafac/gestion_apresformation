@@ -1003,7 +1003,7 @@ const Formation = () => {
                                                                 <div className="absolute inset-0 bg-gradient-to-br from-blue-200 to-blue-300 rounded-full blur-lg opacity-50"></div>
                                                                 <div className="relative w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center border border-gray-300">
                                                                     <span className="text-gray-800 font-bold text-sm">
-                                                                        {participant.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                                                                        {participant.fullName ? participant.fullName.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
                                                                     </span>
                                                                 </div>
                                                             </div>

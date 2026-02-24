@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Register from './pages/Register';
 import Formation from './pages/Formation';
 import UserManagement from './pages/UserManagement';
+import Questionnaire from './pages/Questionnaire';
 
 const PrivateRoute = ({ children }) => {
     const { user } = useAuth();
@@ -35,6 +36,7 @@ function App() {
                             <UserManagement />
                         </PrivateRoute>
                     } />
+                    <Route path="/questionnaire" element={<Questionnaire />} />
                 </Routes>
             </BrowserRouter>
         </AuthProvider>

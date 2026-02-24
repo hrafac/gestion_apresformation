@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/training/send-links-completed").permitAll()
                 .requestMatchers("/api/rh/trainings").permitAll() // Temporary for testing
+                .requestMatchers("/api/response/**").permitAll() // Allow questionnaire responses
                 .requestMatchers("/api/training/**").authenticated() // Allow authenticated users for training CRUD
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/rh/**").hasAnyRole("ADMIN", "RH", "PARTICIPANT")

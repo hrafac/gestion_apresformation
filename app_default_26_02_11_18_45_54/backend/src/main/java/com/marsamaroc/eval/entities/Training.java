@@ -31,6 +31,9 @@ public class Training {
     @Enumerated(EnumType.STRING)
     private TrainingStatus status = TrainingStatus.PAS_ENCORE;
 
+    @OneToMany(mappedBy = "training", cascade = CascadeType.ALL)
+    private java.util.List<Questionnaire> questionnaires;
+
     public boolean isCompleted() {
         return endDate != null && endDate.isBefore(LocalDateTime.now());
     }

@@ -2,11 +2,17 @@ package com.marsamaroc.eval.services;
 
 import com.marsamaroc.eval.dto.TrainingDTO;
 import com.marsamaroc.eval.dto.UserShortDTO;
+import com.marsamaroc.eval.dto.ResponseDTO;
 import com.marsamaroc.eval.entities.Training;
 import com.marsamaroc.eval.entities.TrainingStatus;
 import com.marsamaroc.eval.entities.User;
+import com.marsamaroc.eval.entities.Response;
+import com.marsamaroc.eval.entities.Question;
 import com.marsamaroc.eval.repositories.TrainingRepository;
 import com.marsamaroc.eval.repositories.UserRepository;
+import com.marsamaroc.eval.repositories.QuestionnaireRepository;
+import com.marsamaroc.eval.repositories.ResponseRepository;
+import com.marsamaroc.eval.repositories.QuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +26,15 @@ import java.util.stream.Collectors;
 public class TrainingService {
     @Autowired
     private TrainingRepository trainingRepository;
+    
+    @Autowired
+    private QuestionnaireRepository questionnaireRepository;
+    
+    @Autowired
+    private ResponseRepository responseRepository;
+    
+    @Autowired
+    private QuestionRepository questionRepository;
     
     @Autowired
     private EmailService emailService;
@@ -91,7 +106,22 @@ public class TrainingService {
         }
         
         // Générer le lien du questionnaire
-        String generatedLink = "http://localhost:8080/questionnaire?trainingId=" + trainingId;
+        String generatedLink;
+        
+        // Vérifier si le questionnaire est de type FROID pour générer l'URL sans trainingId
+        // Utiliser une requête directe pour éviter les problèmes de lazy loading
+        java.util.List<com.marsamaroc.eval.entities.Questionnaire> froidQuestionnaires = 
+            questionnaireRepository.findByType(com.marsamaroc.eval.entities.EvaluationType.FROID);
+        
+        // Vérifier s'il y a des questionnaires FROID associés à cette formation
+        boolean hasFroidQuestionnaire = froidQuestionnaires.stream()
+            .anyMatch(q -> q.getTraining() != null && q.getTraining().getId().equals(trainingId));
+        
+        if (hasFroidQuestionnaire) {
+            generatedLink = "http://localhost:8080/questionnaire";
+        } else {
+            generatedLink = "http://localhost:8080/questionnaire?trainingId=" + trainingId;
+        }
         
         // Envoyer le lien par email à chaque participant
         for (User participant : participants) {
@@ -100,7 +130,7 @@ public class TrainingService {
                     participant.getEmail(),
                     participant.getFullName() != null ? participant.getFullName() : participant.getUsername(),
                     training.getTitle(),
-                    generatedLink
+                    participant.getId()  // Passer l'ID utilisateur
                 );
             } catch (Exception e) {
                 System.err.println("Erreur lors de l'envoi de l'email au participant " + participant.getUsername() + ": " + e.getMessage());
@@ -141,7 +171,21 @@ public class TrainingService {
                 try {
                     Set<User> participants = training.getParticipants();
                     if (participants != null && !participants.isEmpty()) {
-                        String link = "http://localhost:8080/questionnaire?trainingId=" + training.getId();
+                        // Vérifier si le questionnaire est de type FROID pour générer l'URL sans trainingId
+                        // Utiliser une requête directe pour éviter les problèmes de lazy loading
+                        java.util.List<com.marsamaroc.eval.entities.Questionnaire> froidQuestionnaires = 
+                            questionnaireRepository.findByType(com.marsamaroc.eval.entities.EvaluationType.FROID);
+                        
+                        // Vérifier s'il y a des questionnaires FROID associés à cette formation
+                        boolean hasFroidQuestionnaire = froidQuestionnaires.stream()
+                            .anyMatch(q -> q.getTraining() != null && q.getTraining().getId().equals(training.getId()));
+                        
+                        String link;
+                        if (hasFroidQuestionnaire) {
+                            link = "http://localhost:8080/questionnaire";
+                        } else {
+                            link = "http://localhost:8080/questionnaire?trainingId=" + training.getId();
+                        }
                         
                         // Envoyer le lien à chaque participant
                         for (User participant : participants) {
@@ -150,7 +194,7 @@ public class TrainingService {
                                     participant.getEmail(),
                                     participant.getFullName() != null ? participant.getFullName() : participant.getUsername(),
                                     training.getTitle(),
-                                    link
+                                    participant.getId()  // Passer l'ID utilisateur
                                 );
                             } catch (Exception e) {
                                 System.err.println("Erreur lors de l'envoi au participant " + participant.getUsername() + ": " + e.getMessage());
@@ -208,20 +252,39 @@ public class TrainingService {
     }
 
             // Sauvegarder les réponses du participant
-            public void saveParticipantResponses(java.util.List<com.marsamaroc.eval.dto.ResponseDTO> responses) {
-                  // Logique pour enregistrer les réponses dans la table Response
-                  // Injection du repository nécessaire
-                  // (Exemple de pseudo-code)
-                  // for (ResponseDTO dto : responses) {
-                  //     Response response = new Response();
-                  //     response.setQuestion(questionRepository.findById(dto.getQuestionId()).orElse(null));
-                  //     response.setUser(userRepository.findById(dto.getUserId()).orElse(null));
-                  //     response.setValue(dto.getValue());
-                  //     response.setSubmittedAt(dto.getSubmittedAt());
-                  //     responseRepository.save(response);
-                  // }
-                  // À compléter avec injection des repositories et gestion d'erreur
+    public void saveParticipantResponses(java.util.List<com.marsamaroc.eval.dto.ResponseDTO> responses) {
+        for (com.marsamaroc.eval.dto.ResponseDTO responseDTO : responses) {
+            try {
+                // Créer une nouvelle réponse
+                Response response = new Response();
+                
+                // Récupérer la question
+                Question question = questionRepository.findById(responseDTO.getQuestionId())
+                    .orElseThrow(() -> new RuntimeException("Question non trouvée avec l'ID: " + responseDTO.getQuestionId()));
+                response.setQuestion(question);
+                
+                // Récupérer l'utilisateur
+                User user = userRepository.findById(responseDTO.getUserId())
+                    .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + responseDTO.getUserId()));
+                response.setUser(user);
+                
+                // Définir la valeur de la réponse
+                response.setValue(responseDTO.getValue());
+                
+                // Définir la date de soumission
+                response.setSubmittedAt(LocalDateTime.now());
+                
+                // Sauvegarder la réponse
+                responseRepository.save(response);
+                
+            } catch (Exception e) {
+                // Log l'erreur mais continuer avec les autres réponses
+                System.err.println("Erreur lors de la sauvegarde de la réponse pour la question " + 
+                    responseDTO.getQuestionId() + " et l'utilisateur " + responseDTO.getUserId() + ": " + e.getMessage());
+                throw new RuntimeException("Erreur lors de la sauvegarde des réponses", e);
             }
+        }
+    }
 
     // Méthode automatique pour mettre à jour les statuts des formations
     public Map<String, Object> updateTrainingStatusesAutomatically() {

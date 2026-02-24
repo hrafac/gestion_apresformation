@@ -15,11 +15,14 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    public void sendQuestionnaireLink(String toEmail, String participantName, String trainingTitle, String questionnaireLink) {
+    public void sendQuestionnaireLink(String toEmail, String participantName, String trainingTitle, Long userId) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(toEmail);
         message.setSubject("Questionnaire d'évaluation - Formation : " + trainingTitle);
+        
+        // Générer le lien vers le frontend avec l'ID utilisateur
+        String questionnaireLink = "http://localhost:3000/questionnaire?userId=" + userId;
         
         String emailBody = String.format(
             "Bonjour %s,\n\n" +
@@ -36,7 +39,7 @@ public class EmailService {
         
         try {
             mailSender.send(message);
-            System.out.println("Email envoyé avec succès à " + toEmail);
+            System.out.println("Email envoyé avec succès à " + toEmail + " avec le lien: " + questionnaireLink);
         } catch (Exception e) {
             System.err.println("Erreur lors de l'envoi de l'email à " + toEmail + ": " + e.getMessage());
             throw new RuntimeException("Impossible d'envoyer l'email à " + toEmail, e);
