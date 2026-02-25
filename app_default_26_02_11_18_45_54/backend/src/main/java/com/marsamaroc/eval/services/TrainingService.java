@@ -436,4 +436,17 @@ public class TrainingService {
         
         return toDTO(updatedTraining);
     }
+    
+    // Récupérer les formations par participant
+    public List<TrainingDTO> getFormationsByParticipant(Long participantId) {
+        // Vérifier si le participant existe
+        User participant = userRepository.findById(participantId)
+            .orElseThrow(() -> new RuntimeException("Participant non trouvé avec l'ID: " + participantId));
+        
+        // Récupérer les formations du participant
+        List<Training> trainings = trainingRepository.findByParticipantId(participantId);
+        
+        // Convertir en DTO
+        return toDTOList(trainings);
+    }
 }

@@ -19,4 +19,7 @@ public interface TrainingRepository extends JpaRepository<Training, Long> {
     
     @Query("SELECT t FROM Training t WHERE t.endDate <= :now AND t.status != 'TERMINE'")
     List<Training> findCompletedTrainingsNotUpdated(@Param("now") LocalDateTime now);
+    
+    @Query("SELECT t FROM Training t JOIN t.participants p WHERE p.id = :participantId")
+    List<Training> findByParticipantId(@Param("participantId") Long participantId);
 }
