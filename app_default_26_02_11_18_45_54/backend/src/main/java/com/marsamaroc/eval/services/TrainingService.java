@@ -449,4 +449,17 @@ public class TrainingService {
         // Convertir en DTO
         return toDTOList(trainings);
     }
+    
+    // Récupérer les formations par formateur
+    public List<TrainingDTO> getFormationsByFormateur(Long formateurId) {
+        // Vérifier si le formateur existe
+        User formateur = userRepository.findById(formateurId)
+            .orElseThrow(() -> new RuntimeException("Formateur non trouvé avec l'ID: " + formateurId));
+        
+        // Récupérer les formations du formateur
+        List<Training> trainings = trainingRepository.findByTrainerId(formateurId);
+        
+        // Convertir en DTO
+        return toDTOList(trainings);
+    }
 }
