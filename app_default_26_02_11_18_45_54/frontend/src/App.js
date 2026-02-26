@@ -9,6 +9,8 @@ import Formation from './pages/Formation';
 import UserManagement from './pages/UserManagement';
 import Questionnaire from './pages/Questionnaire';
 import MesFormations from './pages/MesFormations';
+import FormateurFormations from './pages/FormateurFormations';
+import Acceuil from './pages/Acceuil';
 
 const PrivateRoute = ({ children }) => {
     const { user } = useAuth();
@@ -37,12 +39,18 @@ function App() {
                             <MesFormations />
                         </PrivateRoute>
                     } />
+                    <Route path="/formateur-formations" element={
+                        <PrivateRoute>
+                            <FormateurFormations />
+                        </PrivateRoute>
+                    } />
                     <Route path="/users" element={
                         <PrivateRoute>
                             <UserManagement />
                         </PrivateRoute>
                     } />
                     <Route path="/questionnaire" element={<Questionnaire />} />
+                    <Route path="/acceuil" element={<Acceuil />} />
                 </Routes>
             </BrowserRouter>
         </AuthProvider>

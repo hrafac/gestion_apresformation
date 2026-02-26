@@ -67,6 +67,7 @@ public class TrainingService {
         dto.setLocation(t.getLocation());
         dto.setStartDateTime(t.getStartDate());
         dto.setEndDateTime(t.getEndDate());
+        dto.setStatus(calculateStatus(t.getStartDate(), t.getEndDate()));
         dto.setTrainer(t.getTrainer() != null ? toUserShortDTO(t.getTrainer()) : null);
         dto.setParticipants(t.getParticipants() != null ? toUserShortDTOList(t.getParticipants()) : null);
         return dto;
@@ -86,6 +87,19 @@ public class TrainingService {
 
     public List<TrainingDTO> toDTOList(List<Training> trainings) {
         return trainings.stream().map(this::toDTO).collect(Collectors.toList());
+    }
+    
+    // Méthode pour calculer le statut d'une formation
+    private String calculateStatus(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        LocalDateTime now = LocalDateTime.now();
+        
+        if (now.isBefore(startDateTime)) {
+            return "PLANIFIEE";
+        } else if (now.isAfter(endDateTime)) {
+            return "TERMINEE";
+        } else {
+            return "EN_COURS";
+        }
     }
 
     // Envoi automatique du lien questionnaire à la fin de la formation

@@ -10,6 +10,7 @@ public class TrainingDTO {
     private String location;
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
+    private String status;
     private UserShortDTO trainer;
     private List<UserShortDTO> participants;
 
@@ -25,6 +26,8 @@ public class TrainingDTO {
     public void setStartDateTime(LocalDateTime startDateTime) { this.startDateTime = startDateTime; }
     public LocalDateTime getEndDateTime() { return endDateTime; }
     public void setEndDateTime(LocalDateTime endDateTime) { this.endDateTime = endDateTime; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     public UserShortDTO getTrainer() { return trainer; }
     public void setTrainer(UserShortDTO trainer) { this.trainer = trainer; }
     public List<UserShortDTO> getParticipants() { return participants; }
