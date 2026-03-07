@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom';
 const Questionnaire = () => {
     const [searchParams] = useSearchParams();
     const userId = searchParams.get('userId');
+    const formationId = searchParams.get('formationId');
     const [questionnaires, setQuestionnaires] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -18,7 +19,7 @@ const Questionnaire = () => {
 
     const fetchQuestionnaires = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/questionnaire');
+            const response = await axios.get('http://localhost:8080/public/questionnaireChaud');
             setQuestionnaires(response.data);
             setLoading(false);
         } catch (err) {
@@ -60,6 +61,7 @@ const Questionnaire = () => {
             const responses = selectedQuestionnaire.questions.map(question => ({
                 questionId: question.id,
                 userId: userId, // Inclure l'ID utilisateur
+                idTraining: formationId, // Inclure l'ID de formation
                 value: answers[question.id] || ''
             }));
 

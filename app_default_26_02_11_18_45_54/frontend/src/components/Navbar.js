@@ -17,6 +17,7 @@ const Navbar = ({ children }) => {
         { id: 'analyse', label: 'Analyse', icon: TrendingUp, path: '/analytics', adminOnly: true },
         { id: 'tous-formation', label: 'Tous les Formations', icon: GraduationCap, path: '/formations', participantOnly: true },
         { id: 'mes-formations', label: 'Mes Formations', icon: GraduationCap, path: '/mes-formations', participantOnly: true },
+        { id: 'formateur-formations', label: 'Mes Formations (Formateur)', icon: GraduationCap, path: '/formateur-formations', trainerOnly: true },
     ];
 
     const handleNavClick = (item) => {
@@ -33,6 +34,7 @@ const Navbar = ({ children }) => {
 
     const isParticipant = user && user.role === 'PARTICIPANT';
     const isAdmin = user && user.role === 'ADMIN';
+    const isTrainer = user && user.role === 'TRAINER';
 
     return (
         <div className="flex flex-col h-screen bg-gray-50">
@@ -53,6 +55,79 @@ const Navbar = ({ children }) => {
                                             return false;
                                         }
                                         if (item.participantOnly) {
+                                            return true;
+                                        }
+                                        return false;
+                                    }).map((item) => {
+                                        const Icon = item.icon;
+                                        const isActive = activeNav === item.id;
+                                        return (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => handleNavClick(item)}
+                                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                                                    isActive
+                                                        ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
+                                                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                                                }`}
+                                            >
+                                                <Icon size={18} className={isActive ? 'text-blue-600' : 'text-gray-400'} />
+                                                <span className="font-medium">{item.label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </nav>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                    <Moon size={20} className="text-gray-600" />
+                                </button>
+                                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative">
+                                    <Bell size={20} className="text-gray-600" />
+                                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                                </button>
+                                {user && (
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
+                                            <UserIcon size={16} className="text-white" />
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-gray-800">{user.fullName}</p>
+                                            <ChevronDown size={16} className="text-gray-400" />
+                                        </div>
+                                    </div>
+                                )}
+                                <button
+                                    onClick={logout}
+                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                    title="Déconnexion"
+                                >
+                                    <LogOut size={20} className="text-gray-600" />
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+                    <main className="flex-1 p-6 overflow-y-auto">
+                        {children}
+                    </main>
+                </>
+            ) : isTrainer ? (
+                // Navbar horizontale pour TRAINER
+                <>
+                    <header className="bg-white border-b border-gray-200 px-6 py-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-8">
+                                <img 
+                                    src="/logo4.png" 
+                                    alt="Logo" 
+                                    className="w-40 h-12 object-contain"
+                                />
+                                <nav className="flex items-center gap-6">
+                                    {navItems.filter((item) => {
+                                        if (item.adminOnly) {
+                                            return false;
+                                        }
+                                        if (item.trainerOnly) {
                                             return true;
                                         }
                                         return false;
@@ -150,6 +225,9 @@ const Navbar = ({ children }) => {
                                     }
                                     if (item.participantOnly) {
                                         return false;
+                                    }
+                                    if (item.trainerOnly) {
+                                        return user && user.role === 'TRAINER';
                                     }
                                     return true;
                                 }).map((item) => {

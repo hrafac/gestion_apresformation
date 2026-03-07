@@ -41,6 +41,30 @@ public class QuestionnaireController {
         }
     }
     
+    // Endpoint public pour les questionnaires FROID
+    @GetMapping("/public/questionnaireFroid")
+    public List<QuestionnaireDTO> getQuestionnairesFroid() {
+        List<Questionnaire> questionnaires = questionnaireRepository.findAll().stream()
+            .filter(q -> q.getType() == EvaluationType.FROID)
+            .collect(java.util.stream.Collectors.toList());
+        
+        return questionnaires.stream()
+            .map(this::convertToDTO)
+            .collect(java.util.stream.Collectors.toList());
+    }
+    
+    // Endpoint public pour les questionnaires CHAUD
+    @GetMapping("/public/questionnaireChaud")
+    public List<QuestionnaireDTO> getQuestionnairesChaud() {
+        List<Questionnaire> questionnaires = questionnaireRepository.findAll().stream()
+            .filter(q -> q.getType() == EvaluationType.CHAUD)
+            .collect(java.util.stream.Collectors.toList());
+        
+        return questionnaires.stream()
+            .map(this::convertToDTO)
+            .collect(java.util.stream.Collectors.toList());
+    }
+    
     private QuestionnaireDTO convertToDTO(Questionnaire q) {
         QuestionnaireDTO dto = new QuestionnaireDTO();
         dto.setId(q.getId());
