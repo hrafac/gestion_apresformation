@@ -15,14 +15,14 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    public void sendQuestionnaireLink(String toEmail, String participantName, String trainingTitle, Long userId) {
+    public void sendQuestionnaireLink(String toEmail, String participantName, String trainingTitle, Long userId, Long formationId) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(toEmail);
         message.setSubject("Questionnaire d'évaluation - Formation : " + trainingTitle);
         
-        // Générer le lien vers le frontend avec l'ID utilisateur
-        String questionnaireLink = "http://localhost:3000/questionnaire?userId=" + userId;
+        // Générer le lien vers le frontend avec l'ID utilisateur et l'ID de formation
+        String questionnaireLink = "http://localhost:3000/questionnaire?userId=" + userId + "&formationId=" + formationId;
         
         String emailBody = String.format(
             "Bonjour %s,\n\n" +

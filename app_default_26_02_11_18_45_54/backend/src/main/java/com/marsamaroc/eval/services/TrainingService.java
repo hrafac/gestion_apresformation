@@ -140,14 +140,24 @@ public class TrainingService {
         // Envoyer le lien par email à chaque participant
         for (User participant : participants) {
             try {
+                // Vérifier si l'email du participant n'est pas null
+                if (participant.getEmail() == null || participant.getEmail().trim().isEmpty()) {
+                    System.err.println("Email null ou vide pour le participant " + 
+                        (participant.getUsername() != null ? participant.getUsername() : "inconnu") + 
+                        " - envoi du lien ignoré");
+                    continue;
+                }
+                
                 emailService.sendQuestionnaireLink(
                     participant.getEmail(),
                     participant.getFullName() != null ? participant.getFullName() : participant.getUsername(),
                     training.getTitle(),
-                    participant.getId()  // Passer l'ID utilisateur
+                    participant.getId(),  // Passer l'ID utilisateur
+                    trainingId  // Passer l'ID de formation
                 );
             } catch (Exception e) {
-                System.err.println("Erreur lors de l'envoi de l'email au participant " + participant.getUsername() + ": " + e.getMessage());
+                System.err.println("Erreur lors de l'envoi de l'email au participant " + 
+                    (participant.getUsername() != null ? participant.getUsername() : "inconnu") + ": " + e.getMessage());
             }
         }
         
@@ -185,18 +195,18 @@ public class TrainingService {
                 try {
                     Set<User> participants = training.getParticipants();
                     if (participants != null && !participants.isEmpty()) {
-                        // Vérifier si le questionnaire est de type FROID pour générer l'URL sans trainingId
+                        // Vérifier si le questionnaire est de type CHAUD pour générer l'URL spécifique
                         // Utiliser une requête directe pour éviter les problèmes de lazy loading
-                        java.util.List<com.marsamaroc.eval.entities.Questionnaire> froidQuestionnaires = 
-                            questionnaireRepository.findByType(com.marsamaroc.eval.entities.EvaluationType.FROID);
+                        java.util.List<com.marsamaroc.eval.entities.Questionnaire> chaudQuestionnaires = 
+                            questionnaireRepository.findByType(com.marsamaroc.eval.entities.EvaluationType.CHAUD);
                         
-                        // Vérifier s'il y a des questionnaires FROID associés à cette formation
-                        boolean hasFroidQuestionnaire = froidQuestionnaires.stream()
+                        // Vérifier s'il y a des questionnaires CHAUD associés à cette formation
+                        boolean hasChaudQuestionnaire = chaudQuestionnaires.stream()
                             .anyMatch(q -> q.getTraining() != null && q.getTraining().getId().equals(training.getId()));
                         
                         String link;
-                        if (hasFroidQuestionnaire) {
-                            link = "http://localhost:8080/questionnaire";
+                        if (hasChaudQuestionnaire) {
+                            link = "http://localhost:8080/public/questionnaireChaud";
                         } else {
                             link = "http://localhost:8080/questionnaire?trainingId=" + training.getId();
                         }
@@ -204,14 +214,24 @@ public class TrainingService {
                         // Envoyer le lien à chaque participant
                         for (User participant : participants) {
                             try {
+                                // Vérifier si l'email du participant n'est pas null
+                                if (participant.getEmail() == null || participant.getEmail().trim().isEmpty()) {
+                                    System.err.println("Email null ou vide pour le participant " + 
+                                        (participant.getUsername() != null ? participant.getUsername() : "inconnu") + 
+                                        " - envoi du lien ignoré");
+                                    continue;
+                                }
+                                
                                 emailService.sendQuestionnaireLink(
                                     participant.getEmail(),
                                     participant.getFullName() != null ? participant.getFullName() : participant.getUsername(),
                                     training.getTitle(),
-                                    participant.getId()  // Passer l'ID utilisateur
+                                    participant.getId(),  // Passer l'ID utilisateur
+                                    training.getId()  // Passer l'ID de formation
                                 );
                             } catch (Exception e) {
-                                System.err.println("Erreur lors de l'envoi au participant " + participant.getUsername() + ": " + e.getMessage());
+                                System.err.println("Erreur lors de l'envoi au participant " + 
+                                    (participant.getUsername() != null ? participant.getUsername() : "inconnu") + ": " + e.getMessage());
                             }
                         }
                         
@@ -281,6 +301,11 @@ public class TrainingService {
                 User user = userRepository.findById(responseDTO.getUserId())
                     .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + responseDTO.getUserId()));
                 response.setUser(user);
+                
+                // Récupérer la formation
+                Training training = trainingRepository.findById(responseDTO.getIdTraining())
+                    .orElseThrow(() -> new RuntimeException("Formation non trouvée avec l'ID: " + responseDTO.getIdTraining()));
+                response.setTraining(training);
                 
                 // Définir la valeur de la réponse
                 response.setValue(responseDTO.getValue());

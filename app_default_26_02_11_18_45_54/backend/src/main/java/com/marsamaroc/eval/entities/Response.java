@@ -17,6 +17,9 @@ public class Response {
     @ManyToOne
     private User user; // Can be null for complete anonymity if desired
     
+    @ManyToOne
+    private Training training;
+    
     private String value; // Stores 1-5 for Likert or text for open
     private LocalDateTime submittedAt;
 }
