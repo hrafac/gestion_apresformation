@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Formation from './pages/Formation';
 import UserManagement from './pages/UserManagement';
 import Questionnaire from './pages/Questionnaire';
+import QuestionnaireFroid from './pages/QuestionnaireFroid';
 import MesFormations from './pages/MesFormations';
 import FormateurFormations from './pages/FormateurFormations';
 import Acceuil from './pages/Acceuil';
@@ -50,6 +51,11 @@ function App() {
                         </PrivateRoute>
                     } />
                     <Route path="/questionnaire" element={<Questionnaire />} />
+                    <Route path="/questionnaire-froid" element={
+                        <PrivateRoute>
+                            <QuestionnaireFroid />
+                        </PrivateRoute>
+                    } />
                     <Route path="/acceuil" element={<Acceuil />} />
                 </Routes>
             </BrowserRouter>

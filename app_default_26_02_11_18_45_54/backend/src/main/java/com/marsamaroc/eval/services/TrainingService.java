@@ -302,10 +302,14 @@ public class TrainingService {
                     .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + responseDTO.getUserId()));
                 response.setUser(user);
                 
-                // Récupérer la formation
-                Training training = trainingRepository.findById(responseDTO.getIdTraining())
-                    .orElseThrow(() -> new RuntimeException("Formation non trouvée avec l'ID: " + responseDTO.getIdTraining()));
-                response.setTraining(training);
+                // Récupérer la formation (seulement si idTraining est fourni)
+                if (responseDTO.getIdTraining() != null) {
+                    Training training = trainingRepository.findById(responseDTO.getIdTraining())
+                        .orElseThrow(() -> new RuntimeException("Formation non trouvée avec l'ID: " + responseDTO.getIdTraining()));
+                    response.setTraining(training);
+                } else {
+                    response.setTraining(null); // Permettre les réponses sans formation
+                }
                 
                 // Définir la valeur de la réponse
                 response.setValue(responseDTO.getValue());

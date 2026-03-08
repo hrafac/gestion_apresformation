@@ -17,6 +17,7 @@ const Navbar = ({ children }) => {
         { id: 'analyse', label: 'Analyse', icon: TrendingUp, path: '/analytics', adminOnly: true },
         { id: 'tous-formation', label: 'Tous les Formations', icon: GraduationCap, path: '/formations', participantOnly: true },
         { id: 'mes-formations', label: 'Mes Formations', icon: GraduationCap, path: '/mes-formations', participantOnly: true },
+        { id: 'questionnaire-froid', label: 'Questionnaire Froid', icon: FileText, path: '/questionnaire-froid', participantOnly: true },
         { id: 'formateur-formations', label: 'Mes Formations (Formateur)', icon: GraduationCap, path: '/formateur-formations', trainerOnly: true },
     ];
 
