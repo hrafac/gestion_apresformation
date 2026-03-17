@@ -25,4 +25,9 @@ public interface TrainingRepository extends JpaRepository<Training, Long> {
     
     @Query("SELECT t FROM Training t WHERE t.trainer.id = :trainerId")
     List<Training> findByTrainerId(@Param("trainerId") Long trainerId);
+    
+    @Query("SELECT t.id, t.title, t.theme, t.status, COUNT(p) FROM Training t " +
+           "LEFT JOIN t.participants p " +
+           "GROUP BY t.id, t.title, t.theme, t.status")
+    List<Object[]> countParticipantsByTraining();
 }

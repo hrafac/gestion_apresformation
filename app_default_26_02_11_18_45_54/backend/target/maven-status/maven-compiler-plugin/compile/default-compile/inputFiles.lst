@@ -3,6 +3,7 @@ C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_4
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\controllers\QuestionnaireController.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\EvalApplication.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\controllers\AuthController.java
+C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\dto\ParticipantWithTrainingsDTO.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\config\JwtService.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\repositories\TrainingRepository.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\entities\Training.java
@@ -16,9 +17,11 @@ C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_4
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\config\JwtAuthenticationFilter.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\controllers\RHController.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\dto\TrainingDTO.java
+C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\dto\TrainingParticipantCountDTO.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\controllers\ResponseController.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\dto\QuestionDTO.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\repositories\UserRepository.java
+C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\controllers\ParticipantController.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\dto\QuestionnaireDTO.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\dto\UserShortDTO.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\scheduler\TrainingStatusScheduler.java
@@ -30,5 +33,6 @@ C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_4
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\entities\Role.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\repositories\QuestionnaireRepository.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\repositories\ResponseRepository.java
+C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\services\ParticipantService.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\dto\ResponseDTO.java
 C:\Users\achra\Downloads\app_default_26_02_11_18_45_54\app_default_26_02_11_18_45_54\backend\src\main\java\com\marsamaroc\eval\entities\Question.java
