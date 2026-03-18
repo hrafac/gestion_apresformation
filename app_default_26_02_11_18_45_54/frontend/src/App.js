@@ -12,6 +12,10 @@ import QuestionnaireFroid from './pages/QuestionnaireFroid';
 import MesFormations from './pages/MesFormations';
 import FormateurFormations from './pages/FormateurFormations';
 import Acceuil from './pages/Acceuil';
+import ParticipantsDetails from './pages/ParticipantsDetails';
+import ParticipantCountByTraining from './pages/ParticipantCountByTraining';
+import TrainingAnalytics from './pages/TrainingAnalytics';
+import ParticipantFormationAnalysis from './pages/ParticipantFormationAnalysis';
 
 const PrivateRoute = ({ children }) => {
     const { user } = useAuth();
@@ -54,6 +58,26 @@ function App() {
                     <Route path="/questionnaire-froid" element={
                         <PrivateRoute>
                             <QuestionnaireFroid />
+                        </PrivateRoute>
+                    } />
+                    <Route path="/participants-details" element={
+                        <PrivateRoute>
+                            <ParticipantsDetails />
+                        </PrivateRoute>
+                    } />
+                    <Route path="/participant-count-by-training" element={
+                        <PrivateRoute>
+                            <ParticipantCountByTraining />
+                        </PrivateRoute>
+                    } />
+                    <Route path="/training-analytics" element={
+                        <PrivateRoute>
+                            <TrainingAnalytics />
+                        </PrivateRoute>
+                    } />
+                    <Route path="/participant-formation-analysis" element={
+                        <PrivateRoute>
+                            <ParticipantFormationAnalysis />
                         </PrivateRoute>
                     } />
                     <Route path="/acceuil" element={<Acceuil />} />

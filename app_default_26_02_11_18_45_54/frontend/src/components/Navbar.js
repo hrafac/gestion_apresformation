@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, User as UserIcon, Search, X, Moon, Bell, ChevronDown, ChevronRight, Menu, Grid3x3, Bot, ShoppingCart, Calendar, Users, CheckSquare, FileText, Layout, MessageSquare, HelpCircle, Mail, BarChart3, Palette, Shield, GraduationCap, UserCog, TrendingUp } from 'lucide-react';
+import { LogOut, User as UserIcon, Search, X, Moon, Bell, ChevronDown, ChevronRight, Menu, Grid3x3, Bot, ShoppingCart, Calendar, Users, CheckSquare, FileText, Layout, MessageSquare, HelpCircle, Mail, BarChart3, Palette, Shield, GraduationCap, UserCog, TrendingUp, UserCheck, Users2, UserSearch } from 'lucide-react';
 
 const Navbar = ({ children }) => {
     const { user, logout } = useAuth();
@@ -14,6 +14,10 @@ const Navbar = ({ children }) => {
         { id: 'dashboard', label: 'Dashboard', icon: Grid3x3, path: '/', adminOnly: true },
         { id: 'formation', label: 'Formation', icon: GraduationCap, path: '/formations', adminOnly: true },
         { id: 'gestion-utilisateurs', label: 'Gestion des utilisateurs', icon: UserCog, path: '/users', adminOnly: true },
+        { id: 'participants-details', label: 'Participants Details', icon: UserCheck, path: '/participants-details', rhOnly: true },
+        { id: 'participant-count-by-training', label: 'Participants Count', icon: Users2, path: '/participant-count-by-training', rhOnly: true },
+        { id: 'training-analytics', label: 'Training Analytics', icon: BarChart3, path: '/training-analytics', rhOnly: true },
+        { id: 'participant-formation-analysis', label: 'Participant Analysis', icon: UserSearch, path: '/participant-formation-analysis', rhOnly: true },
         { id: 'analyse', label: 'Analyse', icon: TrendingUp, path: '/analytics', adminOnly: true },
         { id: 'tous-formation', label: 'Tous les Formations', icon: GraduationCap, path: '/formations', participantOnly: true },
         { id: 'mes-formations', label: 'Mes Formations', icon: GraduationCap, path: '/mes-formations', participantOnly: true },
@@ -36,6 +40,7 @@ const Navbar = ({ children }) => {
     const isParticipant = user && user.role === 'PARTICIPANT';
     const isAdmin = user && user.role === 'ADMIN';
     const isTrainer = user && user.role === 'TRAINER';
+    const isRH = user && user.role === 'RH';
 
     return (
         <div className="flex flex-col h-screen bg-gray-50">
@@ -52,7 +57,7 @@ const Navbar = ({ children }) => {
                                 />
                                 <nav className="flex items-center gap-6">
                                     {navItems.filter((item) => {
-                                        if (item.adminOnly) {
+                                        if (item.adminOnly || item.rhOnly) {
                                             return false;
                                         }
                                         if (item.participantOnly) {
@@ -125,7 +130,7 @@ const Navbar = ({ children }) => {
                                 />
                                 <nav className="flex items-center gap-6">
                                     {navItems.filter((item) => {
-                                        if (item.adminOnly) {
+                                        if (item.adminOnly || item.rhOnly) {
                                             return false;
                                         }
                                         if (item.trainerOnly) {
@@ -186,7 +191,7 @@ const Navbar = ({ children }) => {
                     </main>
                 </>
             ) : (
-                // Layout avec sidebar pour ADMIN
+                // Layout avec sidebar pour ADMIN et RH
                 <div className="flex flex-1">
                     {/* Sidebar */}
                     <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300`}>
@@ -223,6 +228,9 @@ const Navbar = ({ children }) => {
                                 {navItems.filter((item) => {
                                     if (item.adminOnly) {
                                         return user && user.role === 'ADMIN';
+                                    }
+                                    if (item.rhOnly) {
+                                        return user && user.role === 'RH';
                                     }
                                     if (item.participantOnly) {
                                         return false;
