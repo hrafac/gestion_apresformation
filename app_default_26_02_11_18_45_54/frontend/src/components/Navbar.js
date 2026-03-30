@@ -12,13 +12,10 @@ const Navbar = ({ children }) => {
 
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: Grid3x3, path: '/', adminOnly: true },
-        { id: 'formation', label: 'Formation', icon: GraduationCap, path: '/formations', adminOnly: true },
+        { id: 'formation', label: 'Formation', icon: GraduationCap, path: '/formations', adminOnly: true, rhAllowed: true },
         { id: 'gestion-utilisateurs', label: 'Gestion des utilisateurs', icon: UserCog, path: '/users', adminOnly: true },
-        { id: 'participants-details', label: 'Participants Details', icon: UserCheck, path: '/participants-details', rhOnly: true },
-        { id: 'participant-count-by-training', label: 'Participants Count', icon: Users2, path: '/participant-count-by-training', rhOnly: true },
-        { id: 'training-analytics', label: 'Training Analytics', icon: BarChart3, path: '/training-analytics', rhOnly: true },
         { id: 'participant-formation-analysis', label: 'Participant Analysis', icon: UserSearch, path: '/participant-formation-analysis', rhOnly: true },
-        { id: 'analyse', label: 'Analyse', icon: TrendingUp, path: '/analytics', adminOnly: true },
+        { id: 'training-analytics', label: 'Training Analytics', icon: BarChart3, path: '/training-analytics', rhOnly: true },
         { id: 'tous-formation', label: 'Tous les Formations', icon: GraduationCap, path: '/formations', participantOnly: true },
         { id: 'mes-formations', label: 'Mes Formations', icon: GraduationCap, path: '/mes-formations', participantOnly: true },
         { id: 'questionnaire-froid', label: 'Questionnaire Froid', icon: FileText, path: '/questionnaire-froid', participantOnly: true },
@@ -226,8 +223,11 @@ const Navbar = ({ children }) => {
                         <nav className="flex-1 overflow-y-auto p-4">
                             <div className="space-y-1">
                                 {navItems.filter((item) => {
-                                    if (item.adminOnly) {
+                                    if (item.adminOnly && !item.rhAllowed) {
                                         return user && user.role === 'ADMIN';
+                                    }
+                                    if (item.adminOnly && item.rhAllowed) {
+                                        return user && (user.role === 'ADMIN' || user.role === 'RH');
                                     }
                                     if (item.rhOnly) {
                                         return user && user.role === 'RH';

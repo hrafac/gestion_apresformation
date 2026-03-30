@@ -20,7 +20,7 @@ public class Training {
     @ManyToOne(fetch = FetchType.EAGER)
     private User trainer;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "training_participants",
         joinColumns = @JoinColumn(name = "training_id"),

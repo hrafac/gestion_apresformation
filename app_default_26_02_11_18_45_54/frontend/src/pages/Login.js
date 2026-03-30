@@ -43,6 +43,10 @@ const Login = () => {
             // Navigate based on user role
             if (res.data.user.role === 'PARTICIPANT') {
                 navigate('/formations');
+            } else if (res.data.user.role === 'RH') {
+                navigate('/participant-formation-analysis');
+            } else if (res.data.user.role === 'TRAINER') {
+                navigate('/formateur-formations');
             } else {
                 navigate('/');
             }

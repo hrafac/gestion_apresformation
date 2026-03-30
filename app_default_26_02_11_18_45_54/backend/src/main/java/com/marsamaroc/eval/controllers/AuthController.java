@@ -47,6 +47,12 @@ public class AuthController {
         return ResponseEntity.ok(participants);
     }
 
+    @GetMapping("/users/participants/count")
+    public ResponseEntity<Long> getParticipantCount() {
+        long count = userRepository.countByRole(Role.PARTICIPANT);
+        return ResponseEntity.ok(count);
+    }
+
     @GetMapping("/users/formateurs")
     public ResponseEntity<List<User>> getUserFormateur() {
         List<User> formateurs = userRepository.findByRole(Role.TRAINER);

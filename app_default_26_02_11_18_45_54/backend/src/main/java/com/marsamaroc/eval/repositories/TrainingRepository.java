@@ -14,6 +14,9 @@ public interface TrainingRepository extends JpaRepository<Training, Long> {
     @Query("SELECT t FROM Training t WHERE t.status = :status")
     List<Training> findByStatus(@Param("status") TrainingStatus status);
     
+    @Query("SELECT COUNT(t) FROM Training t WHERE t.status = :status")
+    long countByStatus(@Param("status") TrainingStatus status);
+    
     @Query("SELECT t FROM Training t WHERE t.startDate <= :now AND t.endDate > :now AND t.status != 'TERMINE'")
     List<Training> findOngoingTrainings(@Param("now") LocalDateTime now);
     

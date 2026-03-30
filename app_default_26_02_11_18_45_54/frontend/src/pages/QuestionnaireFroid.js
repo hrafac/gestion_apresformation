@@ -48,18 +48,18 @@ const QuestionnaireFroid = () => {
                 console.log('Formation analysée:', {
                     id: formation.id,
                     title: formation.title,
-                    endDate: formation.endDate,
-                    startDate: formation.startDate,
+                    endDateTime: formation.endDateTime,
+                    startDateTime: formation.startDateTime,
                     status: formation.status
                 });
                 
-                // Si pas de endDate, on considère que la formation est éligible si le statut est TERMINEE
-                if (!formation.endDate) {
-                    console.log('Formation sans endDate, vérification du statut:', formation.status);
+                // Si pas de endDateTime, on considère que la formation est éligible si le statut est TERMINEE
+                if (!formation.endDateTime) {
+                    console.log('Formation sans endDateTime, vérification du statut:', formation.status);
                     return formation.status === 'TERMINEE';
                 }
                 
-                const endDate = new Date(formation.endDate);
+                const endDate = new Date(formation.endDateTime);
                 const isEligible = endDate <= fiftySixHoursAgo && formation.status === 'TERMINEE';
                 console.log('Date fin formation:', endDate, 'Éligible:', isEligible);
                 return isEligible;
@@ -208,8 +208,8 @@ const QuestionnaireFroid = () => {
                                 <option value="">-- Sélectionner une formation --</option>
                                 {formations.map((formation) => {
                                     let dateText = 'Date non spécifiée';
-                                    if (formation.endDate) {
-                                        const endDate = new Date(formation.endDate);
+                                    if (formation.endDateTime) {
+                                        const endDate = new Date(formation.endDateTime);
                                         dateText = 'Terminée le: ' + endDate.toLocaleDateString('fr-FR') + ' ' + endDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
                                     }
                                     return (

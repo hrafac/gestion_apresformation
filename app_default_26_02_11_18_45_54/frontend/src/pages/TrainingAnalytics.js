@@ -1,564 +1,831 @@
-import React, { useEffect, useState } from 'react';
-import api from '../api/axios';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Pie, Bar } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    ArcElement,
+    Title,
+    Tooltip,
+    Legend
+} from 'chart.js';
 
 const TrainingAnalytics = () => {
     const { user } = useAuth();
-    const [trainings, setTrainings] = useState([]);
-    const [selectedTraining, setSelectedTraining] = useState(null);
-    const [analytics, setAnalytics] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [viewMode, setViewMode] = useState('grid'); // grid, list, analytics
-    const [participantCounts, setParticipantCounts] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [result, setResult] = useState(null);
+    const [error, setError] = useState(null);
+    const [stats, setStats] = useState({
+        totalFormations: 0,
+        totalUsers: 0,
+        participantCount: 0,
+        completedFormations: 0
+    });
 
-    useEffect(() => {
-        if (user?.role !== 'RH') {
-            return;
-        }
+    // Enregistrer les composants Chart.js
+    ChartJS.register(
+        CategoryScale,
+        LinearScale,
+        BarElement,
+        ArcElement,
+        Title,
+        Tooltip,
+        Legend
+    );
 
-        const fetchTrainings = async () => {
-            try {
-                // Utiliser directement count-by-training car /api/training a des problèmes de sérialisation
-                console.log('Récupération des formations depuis count-by-training (méthode principale)...');
-                const countsResponse = await api.get('/participants/count-by-training');
-                if (countsResponse.data && Array.isArray(countsResponse.data)) {
-                    const trainingsFromCounts = countsResponse.data.map(item => ({
-                        id: item.trainingId,
-                        title: item.trainingTitle,
-                        theme: item.trainingTheme,
-                        status: item.trainingStatus || 'EN_COURS'
-                    }));
-                    setTrainings(trainingsFromCounts);
-                    setParticipantCounts(countsResponse.data);
-                    console.log('Formations chargées avec succès depuis count-by-training:', trainingsFromCounts);
-                } else {
-                    console.log('Aucune donnée trouvée dans count-by-training, utilisation des données mockées');
-                    setTrainings([
-                        { id: 1, title: "Java Basics", theme: "Programmation", status: "TERMINE" },
-                        { id: 2, title: "Spring Boot", theme: "Framework", status: "EN_COURS" },
-                        { id: 3, title: "React Development", theme: "Frontend", status: "PAS_ENCORE" },
-                        { id: 4, title: "Database Design", theme: "Backend", status: "TERMINE" },
-                        { id: 5, title: "API Development", theme: "Backend", status: "EN_COURS" }
-                    ]);
-                }
-            } catch (error) {
-                console.error('Erreur lors de la récupération des formations:', error);
-                console.log('Utilisation des données mockées en dernier recours');
-                setTrainings([
-                    { id: 1, title: "Java Basics", theme: "Programmation", status: "TERMINE" },
-                    { id: 2, title: "Spring Boot", theme: "Framework", status: "EN_COURS" },
-                    { id: 3, title: "React Development", theme: "Frontend", status: "PAS_ENCORE" },
-                    { id: 4, title: "Database Design", theme: "Backend", status: "TERMINE" },
-                    { id: 5, title: "API Development", theme: "Backend", status: "EN_COURS" }
-                ]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        const fetchParticipantCounts = async () => {
-            // Plus besoin d'appeler cet endpoint car les données sont déjà récupérées dans fetchTrainings
-            console.log('Les données de participants sont déjà chargées via fetchTrainings');
-        };
-
-        fetchTrainings();
-        fetchParticipantCounts();
-    }, [user]);
-
-    useEffect(() => {
-        if (selectedTraining) {
-            fetchTrainingAnalytics(selectedTraining.id);
-        }
-    }, [selectedTraining]);
-
-    const fetchTrainingAnalytics = async (trainingId) => {
+    const getParticipantCount = async () => {
         try {
-            // Utiliser les endpoints existants
-            const [participantsResponse, countResponse] = await Promise.all([
-                api.get('/participants/with-trainings-and-responses'),
-                api.get('/participants/count-by-training')
-            ]);
-
-            // Filtrer les participants pour cette formation
-            const allParticipants = participantsResponse.data;
-            const trainingParticipants = allParticipants.filter(p => 
-                p.trainings && p.trainings.some(t => t.id === trainingId)
-            );
-
-            // Extraire toutes les réponses pour cette formation
-            const allResponses = [];
-            trainingParticipants.forEach(participant => {
-                if (participant.trainings) {
-                    const training = participant.trainings.find(t => t.id === trainingId);
-                    if (training && training.responses) {
-                        allResponses.push(...training.responses);
-                    }
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:8080/api/auth/users/participants/count', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 }
             });
 
-            const analyticsData = {
-                participants: trainingParticipants,
-                responses: allResponses,
-                training: trainings.find(t => t.id === trainingId)
-            };
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
-            console.log('Analytics data:', analyticsData);
-            setAnalytics(analyticsData);
-        } catch (error) {
-            console.error('Erreur lors de la récupération des analyses:', error);
-            // Utiliser des données mockées si les endpoints échouent
-            const mockAnalytics = {
-                participants: [
-                    { id: 1, fullName: "Ahmed Mohamed", email: "ahmed@example.com" },
-                    { id: 2, fullName: "Fatima Alami", email: "fatima@example.com" },
-                    { id: 3, fullName: "Karim Benzema", email: "karim@example.com" }
-                ],
-                responses: [
-                    { id: 1, userId: 1, questionId: 1, value: "Excellent", submittedAt: "2024-01-15" },
-                    { id: 2, userId: 1, questionId: 2, value: "5", submittedAt: "2024-01-15" },
-                    { id: 3, userId: 2, questionId: 1, value: "Bon", submittedAt: "2024-01-16" },
-                    { id: 4, userId: 3, questionId: 1, value: "Moyen", submittedAt: "2024-01-17" }
-                ],
-                training: trainings.find(t => t.id === trainingId)
-            };
-            setAnalytics(mockAnalytics);
+            const count = await response.json();
+            return count;
+        } catch (err) {
+            console.error('Error fetching participant count:', err);
+            return 0;
         }
     };
 
-    const filteredTrainings = trainings.filter(training =>
-        training.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        training.theme.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const getTotalFormations = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:8080/api/training/count/total', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'TERMINE':
-                return 'bg-green-100 text-green-800 border-green-200';
-            case 'EN_COURS':
-                return 'bg-blue-100 text-blue-800 border-blue-200';
-            case 'PAS_ENCORE':
-                return 'bg-gray-100 text-gray-800 border-gray-200';
-            default:
-                return 'bg-gray-100 text-gray-800 border-gray-200';
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.totalFormations || 0;
+        } catch (err) {
+            console.error('Error fetching total formations:', err);
+            return 0;
         }
     };
 
-    const getProgressColor = (percentage) => {
-        if (percentage >= 80) return 'bg-green-500';
-        if (percentage >= 60) return 'bg-blue-500';
-        if (percentage >= 40) return 'bg-yellow-500';
-        return 'bg-red-500';
+    const getCompletedFormations = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:8080/api/training/count/completed', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.completedFormations || 0;
+        } catch (err) {
+            console.error('Error fetching completed formations:', err);
+            return 0;
+        }
     };
 
-    const calculateCompletionRate = (participants, responses) => {
-        if (!participants || participants.length === 0) return 0;
-        if (!responses || responses.length === 0) return 0;
-        
-        // Calculer le nombre moyen de réponses par participant
-        const avgResponsesPerParticipant = responses.length / participants.length;
-        // Supposer qu'il y a 10 questions par formation (à ajuster selon vos besoins)
-        const totalQuestions = 10;
-        
-        return Math.round((avgResponsesPerParticipant / totalQuestions) * 100);
+    // Charger les statistiques au démarrage
+    useEffect(() => {
+        loadInitialStats();
+    }, []);
+
+    const loadInitialStats = async () => {
+        try {
+            const [participantCount, totalFormations, completedFormations] = await Promise.all([
+                getParticipantCount(),
+                getTotalFormations(),
+                getCompletedFormations()
+            ]);
+            
+            setStats({
+                totalFormations: totalFormations,
+                totalUsers: 0, // On peut garder cette valeur pour compatibilité
+                participantCount: participantCount,
+                completedFormations: completedFormations
+            });
+        } catch (err) {
+            console.error('Error loading initial stats:', err);
+            // En cas d'erreur, essayer au moins de récupérer le nombre de participants
+            const participantCount = await getParticipantCount();
+            setStats(prev => ({
+                ...prev,
+                participantCount: participantCount
+            }));
+        }
     };
 
-    const getEngagementLevel = (completionRate) => {
-        if (completionRate >= 80) return { level: 'Très Élevé', color: 'text-green-600', icon: '🔥' };
-        if (completionRate >= 60) return { level: 'Élevé', color: 'text-blue-600', icon: '⚡' };
-        if (completionRate >= 40) return { level: 'Modéré', color: 'text-yellow-600', icon: '📊' };
-        return { level: 'Faible', color: 'text-red-600', icon: '⚠️' };
+    const handleAnalyze = async () => {
+        setLoading(true);
+        setError(null);
+        setResult(null);
+
+        try {
+            // D'abord faire le POST pour lancer l'analyse
+            const postResponse = await fetch('http://localhost:8000/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    database_config: {
+                        host: "localhost",
+                        database: "marsa_eval",
+                        user: "root",
+                        password: "",
+                        port: 3306
+                    },
+                    analysis_type: "full",
+                    n_topics: 3,
+                    contamination: 0.1
+                })
+            });
+
+            if (!postResponse.ok) {
+                throw new Error(`POST HTTP error! status: ${postResponse.status}`);
+            }
+
+            const postData = await postResponse.json();
+            setResult(postData);
+            
+            // Ensuite faire le GET pour récupérer les informations
+            const getResponse = await fetch('http://localhost:8000/analyze', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!getResponse.ok) {
+                throw new Error(`GET HTTP error! status: ${getResponse.status}`);
+            }
+
+            const getData = await getResponse.json();
+            
+            // Utiliser les données du GET (info) comme résultat principal
+            setResult(getData);
+            
+            // Extraire les statistiques des résultats ou utiliser des valeurs par défaut
+            const [participantCount, totalFormations, completedFormations] = await Promise.all([
+                getParticipantCount(),
+                getTotalFormations(),
+                getCompletedFormations()
+            ]);
+            
+            if (postData.statistics) {
+                setStats({
+                    totalFormations: totalFormations,
+                    totalUsers: postData.statistics.total_users || 0,
+                    participantCount: participantCount,
+                    completedFormations: completedFormations
+                });
+            } else if (getData.database_info) {
+                setStats({
+                    totalFormations: totalFormations,
+                    totalUsers: getData.database_info.total_users || 0,
+                    participantCount: participantCount,
+                    completedFormations: completedFormations
+                });
+            } else {
+                // Données simulées pour démonstration
+                setStats({
+                    totalFormations: totalFormations,
+                    totalUsers: 48,
+                    participantCount: participantCount,
+                    completedFormations: completedFormations
+                });
+            }
+            
+            console.log('POST Analysis result:', postData);
+            console.log('GET Analysis info:', getData);
+            console.log('Final result set:', getData);
+        } catch (err) {
+            setError(err.message);
+            console.error('Analysis error:', err);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    if (user?.role !== 'RH') {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-                <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-                    <svg className="w-16 h-16 mx-auto mb-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Accès Restreint</h2>
-                    <p className="text-gray-600">Cette page est réservée au rôle RH</p>
-                </div>
-            </div>
-        );
-    }
+    const handleGetAnalysisInfo = async () => {
+        setLoading(true);
+        setError(null);
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-marsa-blue mx-auto mb-4"></div>
-                    <p className="text-gray-600">Chargement des analyses...</p>
-                </div>
-            </div>
-        );
-    }
+        try {
+            const response = await fetch('http://localhost:8000/analyze', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            // Update stats with the retrieved information
+            const [participantCount, totalFormations, completedFormations] = await Promise.all([
+                getParticipantCount(),
+                getTotalFormations(),
+                getCompletedFormations()
+            ]);
+            
+            if (data.database_info) {
+                setStats({
+                    totalFormations: totalFormations,
+                    totalUsers: data.database_info.total_users || 0,
+                    participantCount: participantCount,
+                    completedFormations: completedFormations
+                });
+            } else {
+                setStats({
+                    totalFormations: totalFormations,
+                    totalUsers: 0,
+                    participantCount: participantCount,
+                    completedFormations: completedFormations
+                });
+            }
+            
+            console.log('Analysis info:', data);
+            return data;
+        } catch (err) {
+            setError(err.message);
+            console.error('Get analysis info error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Données pour le graphique camembert
+    const pieData = {
+        labels: ['Formations Terminées', 'Formations en Cours'],
+        datasets: [
+            {
+                label: 'Répartition des formations',
+                data: [stats.completedFormations, stats.totalFormations - stats.completedFormations],
+                backgroundColor: [
+                    'rgba(16, 185, 129, 0.85)',
+                    'rgba(59, 130, 246, 0.85)'
+                ],
+                borderColor: [
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(59, 130, 246, 1)'
+                ],
+                borderWidth: 2,
+                hoverBackgroundColor: [
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(59, 130, 246, 1)'
+                ],
+                hoverBorderWidth: 3,
+                hoverOffset: 8
+            },
+        ],
+    };
+
+    // Données pour l'histogramme des statistiques générales
+    const barData = {
+        labels: ['Total Formations', 'Utilisateurs Inscrits', 'Formations Terminées'],
+        datasets: [
+            {
+                label: 'Statistiques',
+                data: [stats.totalFormations, stats.totalUsers, stats.completedFormations],
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.85)',
+                    'rgba(16, 185, 129, 0.85)',
+                    'rgba(139, 92, 246, 0.85)'
+                ],
+                borderColor: [
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(139, 92, 246, 1)'
+                ],
+                borderWidth: 2,
+                borderRadius: 8,
+                hoverBackgroundColor: [
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(139, 92, 246, 1)'
+                ]
+            },
+        ],
+    };
+
+    // Données pour l'histogramme de qualité par formation
+    const qualityByFormationData = result?.data?.quality_by_formation ? {
+        labels: result.data.quality_by_formation.map(item => item.formation),
+        datasets: [
+            {
+                label: 'Score de Qualité',
+                data: result.data.quality_by_formation.map(item => item.score),
+                verdicts: result.data.quality_by_formation.map(item => item.verdict),
+                backgroundColor: result.data.quality_by_formation.map(item => {
+                    if (item.verdict.includes('BONNE')) return 'rgba(16, 185, 129, 0.85)';
+                    if (item.verdict.includes('MOYENNE')) return 'rgba(245, 158, 11, 0.85)';
+                    return 'rgba(239, 68, 68, 0.85)';
+                }),
+                borderColor: result.data.quality_by_formation.map(item => {
+                    if (item.verdict.includes('BONNE')) return 'rgba(16, 185, 129, 1)';
+                    if (item.verdict.includes('MOYENNE')) return 'rgba(245, 158, 11, 1)';
+                    return 'rgba(239, 68, 68, 1)';
+                }),
+                borderWidth: 2,
+                borderRadius: 6,
+                hoverBackgroundColor: result.data.quality_by_formation.map(item => {
+                    if (item.verdict.includes('BONNE')) return 'rgba(16, 185, 129, 1)';
+                    if (item.verdict.includes('MOYENNE')) return 'rgba(245, 158, 11, 1)';
+                    return 'rgba(239, 68, 68, 1)';
+                })
+            },
+        ],
+    } : null;
+
+    // Données pour le graphe camembert de distribution des verdicts
+    const verdictsDistributionData = result?.graphs?.verdicts_distribution ? {
+        labels: result.graphs.verdicts_distribution.labels.map((label, index) => 
+            `${label} (${result.graphs.verdicts_distribution.percentages[index]}%)`
+        ),
+        datasets: [
+            {
+                data: result.graphs.verdicts_distribution.percentages,
+                backgroundColor: result.graphs.verdicts_distribution.labels.map(label => {
+                    if (label.includes('BONNE')) return 'rgba(16, 185, 129, 0.85)';
+                    if (label.includes('MOYENNE')) return 'rgba(245, 158, 11, 0.85)';
+                    return 'rgba(239, 68, 68, 0.85)';
+                }),
+                borderColor: '#ffffff',
+                borderWidth: 3,
+                hoverBackgroundColor: result.graphs.verdicts_distribution.labels.map(label => {
+                    if (label.includes('BONNE')) return 'rgba(16, 185, 129, 1)';
+                    if (label.includes('MOYENNE')) return 'rgba(245, 158, 11, 1)';
+                    return 'rgba(239, 68, 68, 1)';
+                }),
+                hoverBorderWidth: 4,
+                hoverOffset: 10
+            },
+        ],
+    } : null;
+
+    // Données pour le graphe camembert de distribution des sentiments
+    const sentimentsDistributionData = result?.graphs?.sentiments_distribution ? {
+        labels: result.graphs.sentiments_distribution.labels.map((label, index) => 
+            `${label} (${result.graphs.sentiments_distribution.percentages[index]}%)`
+        ),
+        datasets: [
+            {
+                data: result.graphs.sentiments_distribution.percentages,
+                backgroundColor: result.graphs.sentiments_distribution.labels.map(label => {
+                    if (label.includes('positif')) return 'rgba(16, 185, 129, 0.85)';
+                    if (label.includes('neutre')) return 'rgba(107, 114, 128, 0.85)';
+                    return 'rgba(239, 68, 68, 0.85)';
+                }),
+                borderColor: '#ffffff',
+                borderWidth: 3,
+                hoverBackgroundColor: result.graphs.sentiments_distribution.labels.map(label => {
+                    if (label.includes('positif')) return 'rgba(16, 185, 129, 1)';
+                    if (label.includes('neutre')) return 'rgba(107, 114, 128, 1)';
+                    return 'rgba(239, 68, 68, 1)';
+                }),
+                hoverBorderWidth: 4,
+                hoverOffset: 10
+            },
+        ],
+    } : null;
+
+    // Options pour les graphiques camembert
+    const pieChartOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 20,
+                    font: {
+                        size: 14,
+                        weight: '600',
+                        family: 'system-ui, -apple-system, sans-serif'
+                    },
+                    color: '#374151'
+                }
+            },
+            title: {
+                display: true,
+                text: 'Répartition des Formations',
+                font: {
+                    size: 18,
+                    weight: '700',
+                    family: 'system-ui, -apple-system, sans-serif'
+                },
+                color: '#1f2937',
+                padding: {
+                    top: 10,
+                    bottom: 30
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                titleFont: {
+                    size: 14,
+                    weight: '600'
+                },
+                bodyFont: {
+                    size: 13
+                },
+                padding: 12,
+                cornerRadius: 8,
+                displayColors: true,
+                callbacks: {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.parsed;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ((value / total) * 100).toFixed(1);
+                        return `${label}: ${value} (${percentage}%)`;
+                    }
+                }
+            }
+        },
+        animation: {
+            animateRotate: true,
+            animateScale: true,
+            duration: 1500,
+            easing: 'easeInOutQuart'
+        }
+    };
+
+    // Options pour l'histogramme des statistiques générales
+    const barChartOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: 'Statistiques Générales',
+                font: {
+                    size: 18,
+                    weight: '700',
+                    family: 'system-ui, -apple-system, sans-serif'
+                },
+                color: '#1f2937',
+                padding: {
+                    top: 10,
+                    bottom: 30
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                titleFont: {
+                    size: 14,
+                    weight: '600'
+                },
+                bodyFont: {
+                    size: 13
+                },
+                padding: 12,
+                cornerRadius: 8,
+                displayColors: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(156, 163, 175, 0.1)',
+                    drawBorder: false
+                },
+                ticks: {
+                    font: {
+                        size: 12,
+                        weight: '500'
+                    },
+                    color: '#6b7280',
+                    padding: 10
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    font: {
+                        size: 12,
+                        weight: '600'
+                    },
+                    color: '#374151',
+                    padding: 10
+                }
+            }
+        },
+        animation: {
+            duration: 1500,
+            easing: 'easeInOutQuart',
+            delay: (context) => {
+                let delay = 0;
+                if (context.type === 'data' && context.mode === 'default') {
+                    delay = context.dataIndex * 200;
+                }
+                return delay;
+            }
+        }
+    };
+
+    // Options spécifiques pour l'histogramme horizontal de qualité par formation
+    const qualityChartOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        indexAxis: 'y',
+        plugins: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: 'Qualité par Formation',
+                font: {
+                    size: 18,
+                    weight: '700',
+                    family: 'system-ui, -apple-system, sans-serif'
+                },
+                color: '#1f2937',
+                padding: {
+                    top: 10,
+                    bottom: 30
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                titleFont: {
+                    size: 14,
+                    weight: '600'
+                },
+                bodyFont: {
+                    size: 13
+                },
+                padding: 12,
+                cornerRadius: 8,
+                displayColors: false,
+                callbacks: {
+                    label: function(context) {
+                        const score = context.parsed.x;
+                        const verdict = context.dataset.verdicts?.[context.dataIndex] || '';
+                        return `Score: ${score.toFixed(2)} ${verdict}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                beginAtZero: true,
+                max: 100,
+                grid: {
+                    color: 'rgba(156, 163, 175, 0.1)',
+                    drawBorder: false
+                },
+                ticks: {
+                    font: {
+                        size: 12,
+                        weight: '500'
+                    },
+                    color: '#6b7280',
+                    padding: 10,
+                    callback: function(value) {
+                        return value + '%';
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Score de Qualité',
+                    font: {
+                        size: 14,
+                        weight: '600'
+                    },
+                    color: '#374151'
+                }
+            },
+            y: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    font: {
+                        size: 13,
+                        weight: '600'
+                    },
+                    color: '#374151',
+                    padding: 10
+                },
+                title: {
+                    display: true,
+                    text: 'Formations',
+                    font: {
+                        size: 14,
+                        weight: '600'
+                    },
+                    color: '#374151'
+                }
+            }
+        },
+        animation: {
+            duration: 1500,
+            easing: 'easeInOutQuart',
+            delay: (context) => {
+                let delay = 0;
+                if (context.type === 'data' && context.mode === 'default') {
+                    delay = context.dataIndex * 150;
+                }
+                return delay;
+            }
+        }
+    };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
             <div className="max-w-7xl mx-auto">
                 {/* En-tête */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-800 flex items-center">
-                                <svg className="w-8 h-8 mr-3 text-marsa-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                                Analyse et Statistiques des Formations
-                            </h1>
-                            <p className="text-gray-600 mt-2">Vue détaillée des performances et engagement par formation</p>
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-8 backdrop-blur-lg bg-opacity-95">
+                    <div className="text-center">
+                        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-4">
+                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
                         </div>
-                        
-                        {/* Sélecteur de vue */}
-                        <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-                            <button
-                                onClick={() => setViewMode('grid')}
-                                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                                    viewMode === 'grid' 
-                                        ? 'bg-white text-marsa-blue shadow-sm' 
-                                        : 'text-gray-600 hover:text-gray-900'
-                                }`}
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">Tableau de Bord Analytique</h1>
+                        <p className="text-gray-600 text-lg">Analyse intelligente des données de formation avec IA</p>
+                    </div>
+                </div>
+
+                {/* Boîtes statistiques */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    {/* Box Formations */}
+                    <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-6 transform hover:scale-105 transition-all duration-300 hover:shadow-2xl">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+                                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                 </svg>
-                            </button>
-                            <button
-                                onClick={() => setViewMode('list')}
-                                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                                    viewMode === 'list' 
-                                        ? 'bg-white text-marsa-blue shadow-sm' 
-                                        : 'text-gray-600 hover:text-gray-900'
-                                }`}
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            </button>
-                            <button
-                                onClick={() => setViewMode('analytics')}
-                                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                                    viewMode === 'analytics' 
-                                        ? 'bg-white text-marsa-blue shadow-sm' 
-                                        : 'text-gray-600 hover:text-gray-900'
-                                }`}
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8a4 4 0 01-8 0V5a3 3 0 116 0v11a2 2 0 01-4 0V8" />
-                                </svg>
-                            </button>
+                            </div>
+                            <p className="text-blue-100 font-medium mb-2 text-sm uppercase tracking-wide">Total Formations</p>
+                            <p className="text-5xl font-bold text-white mb-2">{stats.totalFormations}</p>
+                            <p className="text-blue-100 text-sm">Formations disponibles</p>
                         </div>
                     </div>
 
-                    {/* Recherche et filtres */}
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-1">
-                            <div className="relative">
-                                <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    {/* Box Utilisateurs */}
+                    <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-xl p-6 transform hover:scale-105 transition-all duration-300 hover:shadow-2xl">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+                                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
-                                <input
-                                    type="text"
-                                    placeholder="Rechercher une formation..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-marsa-blue focus:border-transparent"
-                                />
+                            </div>
+                            <p className="text-emerald-100 font-medium mb-2 text-sm uppercase tracking-wide">Total Participants</p>
+                            <p className="text-5xl font-bold text-white mb-2">{stats.participantCount}</p>
+                            <p className="text-emerald-100 text-sm">Participants inscrits</p>
+                        </div>
+                    </div>
+
+                    {/* Box Formations Terminées */}
+                    <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-xl p-6 transform hover:scale-105 transition-all duration-300 hover:shadow-2xl">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+                                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <p className="text-purple-100 font-medium mb-2 text-sm uppercase tracking-wide">Formations Terminées</p>
+                            <p className="text-5xl font-bold text-white mb-2">{stats.completedFormations}</p>
+                            <div className="flex items-center gap-2">
+                                <div className="w-16 bg-white bg-opacity-20 rounded-full h-2">
+                                    <div className="bg-white h-2 rounded-full" style={{width: `${stats.totalFormations > 0 ? (stats.completedFormations / stats.totalFormations) * 100 : 0}%`}}></div>
+                                </div>
+                                <p className="text-purple-100 text-sm font-medium">
+                                    {stats.totalFormations > 0 ? Math.round((stats.completedFormations / stats.totalFormations) * 100) : 0}%
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Vue Analytics */}
-                {viewMode === 'analytics' && selectedTraining && analytics && (
-                    <div className="space-y-6">
-                        {/* Carte principale de la formation */}
-                        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <div>
-                                    <h2 className="text-2xl font-bold text-gray-800">{analytics.training.title}</h2>
-                                    <p className="text-gray-600">{analytics.training.theme}</p>
-                                </div>
-                                <button
-                                    onClick={() => setSelectedTraining(null)}
-                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                                >
-                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            {/* Métriques principales */}
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm text-blue-600 font-medium">Participants</p>
-                                            <p className="text-2xl font-bold text-blue-800">{analytics.participants.length}</p>
-                                        </div>
-                                        <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                {/* Graphiques d'analyse (uniquement si des données sont disponibles) */}
+                {result && (
+                    <div className="space-y-8 mb-8">
+                        {/* Histogramme de qualité par formation */}
+                        {qualityByFormationData && (
+                            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 backdrop-blur-lg bg-opacity-95">
+                                <div className="flex items-center justify-center mb-6">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mr-3">
+                                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                         </svg>
                                     </div>
+                                    <h2 className="text-2xl font-bold text-gray-800">Qualité par Formation</h2>
                                 </div>
+                                <div className="bg-gray-50 rounded-xl p-6">
+                                    <Bar data={qualityByFormationData} options={qualityChartOptions} />
+                                </div>
+                            </div>
+                        )}
 
-                                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm text-green-600 font-medium">Réponses</p>
-                                            <p className="text-2xl font-bold text-green-800">{analytics.responses.length}</p>
+                        {/* Graphiques de distribution sur la même ligne */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {/* Distribution des verdicts */}
+                            {verdictsDistributionData && (
+                                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 backdrop-blur-lg bg-opacity-95 transform hover:scale-105 transition-all duration-300">
+                                    <div className="flex items-center justify-center mb-6">
+                                        <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mr-3">
+                                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
                                         </div>
-                                        <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                                        </svg>
+                                        <h2 className="text-2xl font-bold text-gray-800">Distribution des Verdicts</h2>
+                                    </div>
+                                    <div className="bg-gray-50 rounded-xl p-6">
+                                        <Pie data={verdictsDistributionData} options={pieChartOptions} />
                                     </div>
                                 </div>
+                            )}
 
-                                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm text-purple-600 font-medium">Taux Complétion</p>
-                                            <p className="text-2xl font-bold text-purple-800">
-                                                {calculateCompletionRate(analytics.participants, analytics.responses)}%
-                                            </p>
+                            {/* Distribution des sentiments */}
+                            {sentimentsDistributionData && (
+                                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 backdrop-blur-lg bg-opacity-95 transform hover:scale-105 transition-all duration-300">
+                                    <div className="flex items-center justify-center mb-6">
+                                        <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center mr-3">
+                                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
                                         </div>
-                                        <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <h2 className="text-2xl font-bold text-gray-800">Distribution des Sentiments</h2>
+                                    </div>
+                                    <div className="bg-gray-50 rounded-xl p-6">
+                                        <Pie data={sentimentsDistributionData} options={pieChartOptions} />
                                     </div>
                                 </div>
-
-                                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm text-orange-600 font-medium">Engagement</p>
-                                            <p className="text-lg font-bold text-orange-800">
-                                                {getEngagementLevel(calculateCompletionRate(analytics.participants, analytics.responses)).level}
-                                            </p>
-                                        </div>
-                                        <span className="text-2xl">
-                                            {getEngagementLevel(calculateCompletionRate(analytics.participants, analytics.responses)).icon}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Barre de progression */}
-                            <div className="mb-6">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-gray-700">Progression globale</span>
-                                    <span className="text-sm font-medium text-gray-700">
-                                        {calculateCompletionRate(analytics.participants, analytics.responses)}%
-                                    </span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-3">
-                                    <div 
-                                        className={`h-3 rounded-full transition-all duration-300 ${getProgressColor(calculateCompletionRate(analytics.participants, analytics.responses))}`}
-                                        style={{ width: `${calculateCompletionRate(analytics.participants, analytics.responses)}%` }}
-                                    ></div>
-                                </div>
-                            </div>
-
-                            {/* Participants */}
-                            <div className="mb-6">
-                                <h3 className="text-lg font-semibold text-gray-800 mb-4">Participants ({analytics.participants.length})</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {analytics.participants.map((participant) => (
-                                        <div key={participant.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <p className="font-medium text-gray-900">{participant.fullName}</p>
-                                                    <p className="text-sm text-gray-600">{participant.email}</p>
-                                                </div>
-                                                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                                                    <span className="text-white font-semibold">
-                                                        {participant.fullName.charAt(0).toUpperCase()}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Réponses par participant */}
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-800 mb-4">Activité des réponses</h3>
-                                <div className="space-y-3">
-                                    {analytics.participants.map((participant) => {
-                                        const participantResponses = analytics.responses.filter(r => r.userId === participant.id);
-                                        const responseRate = analytics.participants.length > 0 
-                                            ? Math.min(100, Math.round((participantResponses.length / 10) * 100)) 
-                                            : 0;
-                                        
-                                        return (
-                                            <div key={participant.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                                                            <span className="text-white text-sm font-semibold">
-                                                                {participant.fullName.charAt(0).toUpperCase()}
-                                                            </span>
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-medium text-gray-900">{participant.fullName}</p>
-                                                            <p className="text-sm text-gray-600">{participantResponses.length} réponses</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <span className={`text-sm font-medium ${getEngagementLevel(responseRate).color}`}>
-                                                            {responseRate}%
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                                    <div 
-                                                        className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(responseRate)}`}
-                                                        style={{ width: `${responseRate}%` }}
-                                                    ></div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 )}
 
-                {/* Vue Grid ou List */}
-                {viewMode !== 'analytics' && (
-                    <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
-                        {filteredTrainings.map((training) => {
-                            // Récupérer le nombre de participants réel depuis les données
-                            const countData = participantCounts.find(item => item.trainingId === training.id);
-                            const participantCount = countData ? countData.participantCount : 0;
-                            
-                            // Calculer le taux de complétion basé sur le nombre de participants
-                            const completionRate = participantCount > 0 ? Math.min(100, Math.floor((participantCount / 10) * 100)) : 0;
-                            const engagement = getEngagementLevel(completionRate);
-                            
-                            return (
-                                <div 
-                                    key={training.id} 
-                                    className={`bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow cursor-pointer ${
-                                        viewMode === 'list' ? 'flex' : ''
-                                    }`}
-                                    onClick={() => setSelectedTraining(training)}
-                                >
-                                    {viewMode === 'grid' ? (
-                                        <>
-                                            {/* Header */}
-                                            <div className="p-6 border-b border-gray-200">
-                                                <div className="flex items-center justify-between mb-4">
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(training.status)}`}>
-                                                        {training.status}
-                                                    </span>
-                                                    <span className="text-2xl">{engagement.icon}</span>
-                                                </div>
-                                                <h3 className="text-lg font-bold text-gray-800 mb-2">{training.title}</h3>
-                                                <p className="text-sm text-gray-600 mb-4">{training.theme}</p>
-                                                
-                                                {/* Métriques */}
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div className="text-center">
-                                                        <p className="text-2xl font-bold text-blue-600">{participantCount}</p>
-                                                        <p className="text-xs text-gray-600">Participants</p>
-                                                    </div>
-                                                    <div className="text-center">
-                                                        <p className="text-2xl font-bold text-green-600">{completionRate}%</p>
-                                                        <p className="text-xs text-gray-600">Complétion</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            {/* Progress bar */}
-                                            <div className="p-4 bg-gray-50">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="text-sm font-medium text-gray-700">Progression</span>
-                                                    <span className="text-sm font-medium text-gray-700">{completionRate}%</span>
-                                                </div>
-                                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                                    <div 
-                                                        className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(completionRate)}`}
-                                                        style={{ width: `${completionRate}%` }}
-                                                    ></div>
-                                                </div>
-                                                <p className="text-xs text-gray-600 mt-2 text-center">
-                                                    Engagement: <span className={engagement.color}>{engagement.level}</span>
-                                                </p>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <>
-                                            {/* List view */}
-                                            <div className="p-6 flex-1">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-4 mb-2">
-                                                            <h3 className="text-lg font-bold text-gray-800">{training.title}</h3>
-                                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(training.status)}`}>
-                                                                {training.status}
-                                                            </span>
-                                                            <span className="text-2xl">{engagement.icon}</span>
-                                                        </div>
-                                                        <p className="text-sm text-gray-600 mb-4">{training.theme}</p>
-                                                        
-                                                        <div className="flex items-center gap-8">
-                                                            <div>
-                                                                <p className="text-lg font-bold text-blue-600">{participantCount}</p>
-                                                                <p className="text-xs text-gray-600">Participants</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-lg font-bold text-green-600">{completionRate}%</p>
-                                                                <p className="text-xs text-gray-600">Complétion</p>
-                                                            </div>
-                                                            <div className="flex-1">
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="text-sm font-medium text-gray-700">Progression</span>
-                                                                    <span className="text-sm font-medium text-gray-700">{completionRate}%</span>
-                                                                </div>
-                                                                <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                                                                    <div 
-                                                                        className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(completionRate)}`}
-                                                                        style={{ width: `${completionRate}%` }}
-                                                                    ></div>
-                                                                </div>
-                                                            </div>
-                                                            <div>
-                                                                <p className={`text-sm font-medium ${engagement.color}`}>{engagement.level}</p>
-                                                                <p className="text-xs text-gray-600">Engagement</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </>
-                                    )}
+                {/* Bouton d'analyse */}
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 backdrop-blur-lg bg-opacity-95">
+                    <div className="text-center">
+                        <button
+                            onClick={handleAnalyze}
+                            disabled={loading}
+                            className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform ${
+                                loading
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed scale-95'
+                                    : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 hover:scale-105 shadow-lg hover:shadow-xl'
+                            }`}
+                        >
+                            {loading ? (
+                                <div className="flex items-center gap-3">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                    <span>Analyse en cours...</span>
                                 </div>
-                            );
-                        })}
+                            ) : (
+                                <div className="flex items-center gap-3">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                    <span>Lancer l'analyse</span>
+                                </div>
+                            )}
+                        </button>
+                        {error && (
+                            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                                <p className="text-red-600 text-center">{error}</p>
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
 
-                {filteredTrainings.length === 0 && (
-                    <div className="text-center py-12">
-                        <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune formation trouvée</h3>
-                        <p className="text-gray-500">
-                            {searchTerm ? 'Essayez de modifier votre recherche' : 'Aucune formation disponible'}
-                        </p>
-                    </div>
-                )}
+             
+
+                
             </div>
         </div>
     );

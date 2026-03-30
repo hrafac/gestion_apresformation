@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { Users, BookOpen, TrendingUp, Activity, Search, X, BarChart3, UserCheck, Clock, Award, Target } from 'lucide-react';
 
 const ParticipantFormationAnalysis = () => {
     const { user } = useAuth();
@@ -167,11 +168,11 @@ const ParticipantFormationAnalysis = () => {
 
     if (user?.role !== 'RH') {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-                <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-                    <svg className="w-16 h-16 mx-auto mb-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 text-center max-w-md border border-white/20">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <X className="w-8 h-8 text-red-500" />
+                    </div>
                     <h2 className="text-2xl font-bold text-gray-800 mb-2">Accès Restreint</h2>
                     <p className="text-gray-600">Cette page est réservée au rôle RH</p>
                 </div>
@@ -181,10 +182,13 @@ const ParticipantFormationAnalysis = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-marsa-blue mx-auto mb-4"></div>
-                    <p className="text-gray-600">Chargement de l'analyse...</p>
+                    <div className="relative">
+                        <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-spin border-t-blue-600 mx-auto mb-4"></div>
+                        <div className="absolute inset-0 w-16 h-16 border-4 border-transparent rounded-full animate-spin border-b-indigo-600 mx-auto mb-4"></div>
+                    </div>
+                    <p className="text-gray-600 font-medium">Chargement de l'analyse...</p>
                 </div>
             </div>
         );
@@ -193,103 +197,106 @@ const ParticipantFormationAnalysis = () => {
     const overallStats = getOverallStatistics();
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 lg:p-6">
             <div className="max-w-7xl mx-auto">
                 {/* En-tête */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-6">
-                    <div className="flex items-center justify-between mb-6">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 mb-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-800 flex items-center">
-                                <svg className="w-8 h-8 mr-3 text-marsa-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                                Analyse Participants-Formations
-                            </h1>
-                            <p className="text-gray-600 mt-2">Analyse détaillée de la réaction des participants aux formations</p>
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                                    <BarChart3 className="w-6 h-6 text-white" />
+                                </div>
+                                <h1 className="text-3xl font-bold text-gray-800">Analyse Participants-Formations</h1>
+                            </div>
+                            <p className="text-gray-600 ml-15">Analyse détaillée de la réaction des participants aux formations</p>
                         </div>
                         
                         {/* Sélecteur de vue */}
-                        <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                        <div className="flex items-center gap-1 bg-gray-100/50 rounded-xl p-1">
                             <button
                                 onClick={() => setViewMode('participants')}
-                                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                                     viewMode === 'participants' 
-                                        ? 'bg-white text-marsa-blue shadow-sm' 
-                                        : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-blue-600 shadow-sm' 
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                                 }`}
                             >
+                                <Users className="w-4 h-4 inline mr-2" />
                                 Participants
                             </button>
                             <button
                                 onClick={() => setViewMode('formations')}
-                                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                                     viewMode === 'formations' 
-                                        ? 'bg-white text-marsa-blue shadow-sm' 
-                                        : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-blue-600 shadow-sm' 
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                                 }`}
                             >
+                                <BookOpen className="w-4 h-4 inline mr-2" />
                                 Formations
                             </button>
                             <button
                                 onClick={() => setViewMode('detailed')}
-                                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                                     viewMode === 'detailed' 
-                                        ? 'bg-white text-marsa-blue shadow-sm' 
-                                        : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-blue-600 shadow-sm' 
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                                 }`}
                             >
+                                <Activity className="w-4 h-4 inline mr-2" />
                                 Détaillé
                             </button>
                         </div>
                     </div>
 
                     {/* Statistiques globales */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-xl p-5 border border-blue-200/50 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-blue-600 font-medium">Total Participants</p>
-                                    <p className="text-2xl font-bold text-blue-800">{overallStats.totalParticipants}</p>
+                                    <p className="text-sm text-blue-600 font-semibold mb-1">Total Participants</p>
+                                    <p className="text-3xl font-bold text-blue-800">{overallStats.totalParticipants}</p>
                                 </div>
-                                <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
+                                <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                                    <Users className="w-6 h-6 text-blue-600" />
+                                </div>
                             </div>
                         </div>
 
-                        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                        <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-xl p-5 border border-green-200/50 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-green-600 font-medium">Total Formations</p>
-                                    <p className="text-2xl font-bold text-green-800">{overallStats.totalTrainings}</p>
+                                    <p className="text-sm text-green-600 font-semibold mb-1">Total Formations</p>
+                                    <p className="text-3xl font-bold text-green-800">{overallStats.totalTrainings}</p>
                                 </div>
-                                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
+                                <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+                                    <BookOpen className="w-6 h-6 text-green-600" />
+                                </div>
                             </div>
                         </div>
 
-                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+                        <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 rounded-xl p-5 border border-purple-200/50 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-purple-600 font-medium">Participants Actifs</p>
-                                    <p className="text-2xl font-bold text-purple-800">{overallStats.activeParticipants}</p>
+                                    <p className="text-sm text-purple-600 font-semibold mb-1">Participants Actifs</p>
+                                    <p className="text-3xl font-bold text-purple-800">{overallStats.activeParticipants}</p>
                                 </div>
-                                <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
+                                <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                                    <UserCheck className="w-6 h-6 text-purple-600" />
+                                </div>
                             </div>
                         </div>
 
-                        <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+                        <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 rounded-xl p-5 border border-orange-200/50 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-orange-600 font-medium">Taux Participation</p>
-                                    <p className="text-2xl font-bold text-orange-800">{overallStats.participationRate}%</p>
+                                    <p className="text-sm text-orange-600 font-semibold mb-1">Taux Participation</p>
+                                    <p className="text-3xl font-bold text-orange-800">{overallStats.participationRate}%</p>
                                 </div>
-                                <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
+                                <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                                    <TrendingUp className="w-6 h-6 text-orange-600" />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -298,15 +305,13 @@ const ParticipantFormationAnalysis = () => {
                     <div className="flex flex-col sm:flex-row gap-4">
                         <div className="flex-1">
                             <div className="relative">
-                                <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input
                                     type="text"
                                     placeholder="Rechercher un participant..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-marsa-blue focus:border-transparent"
+                                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm transition-all duration-200"
                                 />
                             </div>
                         </div>
@@ -315,7 +320,7 @@ const ParticipantFormationAnalysis = () => {
 
                 {/* Vue Participants */}
                 {viewMode === 'participants' && (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                         {filteredParticipants.map((participant) => {
                             const totalTrainings = participant.trainings?.length || 0;
                             const totalResponses = participant.trainings?.reduce((sum, t) => sum + (t.responses?.length || 0), 0) || 0;
@@ -323,61 +328,64 @@ const ParticipantFormationAnalysis = () => {
                             const engagement = getEngagementLevel(totalResponses, totalTrainings * 10);
 
                             return (
-                                <div key={participant.id} className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow">
+                                <div key={participant.id} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] group">
                                     <div className="p-6">
                                         <div className="flex items-center justify-between mb-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                                                    <span className="text-white font-bold text-lg">
+                                                <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center ring-4 ring-blue-100">
+                                                    <span className="text-white font-bold text-xl">
                                                         {participant.fullName?.charAt(0).toUpperCase() || 'U'}
                                                     </span>
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-lg font-bold text-gray-800">{participant.fullName}</h3>
-                                                    <p className="text-sm text-gray-600">{participant.email}</p>
+                                                    <h3 className="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{participant.fullName}</h3>
+                                                    <p className="text-sm text-gray-500">{participant.email}</p>
                                                 </div>
                                             </div>
-                                            <span className="text-2xl">{engagement.icon}</span>
+                                            <div className="text-3xl group-hover:scale-110 transition-transform">{engagement.icon}</div>
                                         </div>
 
-                                        <div className="grid grid-cols-3 gap-4 mb-4">
-                                            <div className="text-center">
+                                        <div className="grid grid-cols-3 gap-3 mb-4">
+                                            <div className="text-center bg-blue-50/50 rounded-lg p-3">
                                                 <p className="text-xl font-bold text-blue-600">{totalTrainings}</p>
-                                                <p className="text-xs text-gray-600">Formations</p>
+                                                <p className="text-xs text-blue-500 font-medium">Formations</p>
                                             </div>
-                                            <div className="text-center">
+                                            <div className="text-center bg-green-50/50 rounded-lg p-3">
                                                 <p className="text-xl font-bold text-green-600">{totalResponses}</p>
-                                                <p className="text-xs text-gray-600">Réponses</p>
+                                                <p className="text-xs text-green-500 font-medium">Réponses</p>
                                             </div>
-                                            <div className="text-center">
+                                            <div className="text-center bg-purple-50/50 rounded-lg p-3">
                                                 <p className="text-xl font-bold text-purple-600">{avgResponseRate}%</p>
-                                                <p className="text-xs text-gray-600">Taux</p>
+                                                <p className="text-xs text-purple-500 font-medium">Taux</p>
                                             </div>
                                         </div>
 
                                         <div className="mb-4">
                                             <div className="flex items-center justify-between mb-2">
-                                                <span className="text-sm font-medium text-gray-700">Engagement global</span>
-                                                <span className="text-sm font-medium text-gray-700">{avgResponseRate}%</span>
+                                                <span className="text-sm font-semibold text-gray-700">Engagement global</span>
+                                                <span className="text-sm font-bold text-gray-700">{avgResponseRate}%</span>
                                             </div>
-                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div className="w-full bg-gray-200/50 rounded-full h-3 overflow-hidden">
                                                 <div 
-                                                    className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(avgResponseRate)}`}
+                                                    className={`h-3 rounded-full transition-all duration-500 ${getProgressColor(avgResponseRate)}`}
                                                     style={{ width: `${avgResponseRate}%` }}
                                                 ></div>
                                             </div>
                                         </div>
 
                                         <div className="flex items-center justify-between">
-                                            <p className="text-sm text-gray-600">
-                                                Engagement: <span className={engagement.color}>{engagement.level}</span>
-                                            </p>
+                                            <div className="flex items-center gap-2">
+                                                <Award className={`w-4 h-4 ${engagement.color.replace('text-', 'fill-current text-')}`} />
+                                                <p className="text-sm text-gray-600">
+                                                    <span className={`font-semibold ${engagement.color}`}>{engagement.level}</span>
+                                                </p>
+                                            </div>
                                             <button
                                                 onClick={() => {
                                                     setSelectedParticipant(participant);
                                                     setViewMode('detailed');
                                                 }}
-                                                className="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
+                                                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-semibold rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
                                             >
                                                 Voir détails
                                             </button>
@@ -415,49 +423,59 @@ const ParticipantFormationAnalysis = () => {
                             const engagement = getEngagementLevel(responsesInTraining, participantsInTraining.length * 10);
 
                             return (
-                                <div key={training.id} className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div>
-                                            <h3 className="text-lg font-bold text-gray-800">{training.title}</h3>
-                                            <p className="text-sm text-gray-600">{training.theme}</p>
+                                <div key={training.id} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 hover:shadow-xl transition-all duration-300">
+                                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+                                        <div className="flex-1">
+                                            <h3 className="text-xl font-bold text-gray-800 mb-2">{training.title}</h3>
+                                            <p className="text-sm text-gray-600 flex items-center gap-2">
+                                                <BookOpen className="w-4 h-4" />
+                                                {training.theme}
+                                            </p>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(training.status)}`}>
+                                            <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold border ${getStatusColor(training.status)}`}>
                                                 {training.status}
                                             </span>
-                                            <span className="text-2xl">{engagement.icon}</span>
+                                            <div className="text-3xl group-hover:scale-110 transition-transform">{engagement.icon}</div>
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-4 gap-4 mb-4">
-                                        <div className="text-center">
-                                            <p className="text-xl font-bold text-blue-600">{participantsInTraining.length}</p>
-                                            <p className="text-xs text-gray-600">Participants</p>
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                                        <div className="bg-blue-50/50 rounded-xl p-4 text-center">
+                                            <Users className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+                                            <p className="text-2xl font-bold text-blue-700">{participantsInTraining.length}</p>
+                                            <p className="text-xs text-blue-600 font-medium">Participants</p>
                                         </div>
-                                        <div className="text-center">
-                                            <p className="text-xl font-bold text-green-600">{responsesInTraining}</p>
-                                            <p className="text-xs text-gray-600">Réponses totales</p>
+                                        <div className="bg-green-50/50 rounded-xl p-4 text-center">
+                                            <Target className="w-6 h-6 text-green-500 mx-auto mb-2" />
+                                            <p className="text-2xl font-bold text-green-700">{responsesInTraining}</p>
+                                            <p className="text-xs text-green-600 font-medium">Réponses totales</p>
                                         </div>
-                                        <div className="text-center">
-                                            <p className="text-xl font-bold text-purple-600">{avgResponsesPerParticipant}</p>
-                                            <p className="text-xs text-gray-600">Moyenne/participant</p>
+                                        <div className="bg-purple-50/50 rounded-xl p-4 text-center">
+                                            <BarChart3 className="w-6 h-6 text-purple-500 mx-auto mb-2" />
+                                            <p className="text-2xl font-bold text-purple-700">{avgResponsesPerParticipant}</p>
+                                            <p className="text-xs text-purple-600 font-medium">Moyenne/participant</p>
                                         </div>
-                                        <div className="text-center">
-                                            <p className="text-xl font-bold text-orange-600">{completionRate}%</p>
-                                            <p className="text-xs text-gray-600">Complétion</p>
+                                        <div className="bg-orange-50/50 rounded-xl p-4 text-center">
+                                            <TrendingUp className="w-6 h-6 text-orange-500 mx-auto mb-2" />
+                                            <p className="text-2xl font-bold text-orange-700">{completionRate}%</p>
+                                            <p className="text-xs text-orange-600 font-medium">Complétion</p>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center justify-between">
-                                        <p className="text-sm text-gray-600">
-                                            Engagement: <span className={engagement.color}>{engagement.level}</span>
-                                        </p>
+                                        <div className="flex items-center gap-2">
+                                            <Award className={`w-4 h-4 ${engagement.color.replace('text-', 'fill-current text-')}`} />
+                                            <p className="text-sm text-gray-600">
+                                                Engagement: <span className={`font-semibold ${engagement.color}`}>{engagement.level}</span>
+                                            </p>
+                                        </div>
                                         <button
                                             onClick={() => {
                                                 setSelectedTraining(training);
                                                 setViewMode('detailed');
                                             }}
-                                            className="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
+                                            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-semibold rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
                                         >
                                             Voir participants
                                         </button>
@@ -471,16 +489,16 @@ const ParticipantFormationAnalysis = () => {
                 {/* Vue Détaillée */}
                 {viewMode === 'detailed' && selectedParticipant && (
                     <div className="space-y-6">
-                        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
                             <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                                        <span className="text-white font-bold text-lg">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center ring-4 ring-blue-100">
+                                        <span className="text-white font-bold text-2xl">
                                             {selectedParticipant.fullName?.charAt(0).toUpperCase() || 'U'}
                                         </span>
                                     </div>
                                     <div>
-                                        <h2 className="text-xl font-bold text-gray-800">{selectedParticipant.fullName}</h2>
+                                        <h2 className="text-2xl font-bold text-gray-800">{selectedParticipant.fullName}</h2>
                                         <p className="text-sm text-gray-600">{selectedParticipant.email}</p>
                                     </div>
                                 </div>
@@ -490,11 +508,9 @@ const ParticipantFormationAnalysis = () => {
                                         setSelectedTraining(null);
                                         setViewMode('participants');
                                     }}
-                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                    className="p-3 hover:bg-gray-100/50 rounded-xl transition-all duration-200 hover:scale-105"
                                 >
-                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
+                                    <X className="w-5 h-5 text-gray-500" />
                                 </button>
                             </div>
 
@@ -506,31 +522,34 @@ const ParticipantFormationAnalysis = () => {
                                     return (
                                         <div 
                                             key={training.id} 
-                                            className="bg-gray-50 rounded-lg p-4 border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                                            className="bg-gray-50/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 cursor-pointer hover:bg-gray-100/50 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
                                             onClick={() => setSelectedTraining(training)}
                                         >
                                             <div className="flex items-center justify-between mb-3">
-                                                <h4 className="font-medium text-gray-800">{training.title}</h4>
-                                                <span className="text-lg">{engagement.icon}</span>
+                                                <h4 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">{training.title}</h4>
+                                                <div className="text-lg group-hover:scale-110 transition-transform">{engagement.icon}</div>
                                             </div>
-                                            <div className="space-y-2">
-                                                <div className="flex justify-between text-sm">
-                                                    <span className="text-gray-600">Réponses:</span>
-                                                    <span className="font-medium">{stats.totalResponses}/10</span>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm text-gray-600">Réponses:</span>
+                                                    <span className="font-bold text-blue-600">{stats.totalResponses}/10</span>
                                                 </div>
-                                                <div className="flex justify-between text-sm">
-                                                    <span className="text-gray-600">Score moyen:</span>
-                                                    <span className="font-medium">{stats.averageScore}</span>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm text-gray-600">Score moyen:</span>
+                                                    <span className="font-bold text-green-600">{stats.averageScore}</span>
                                                 </div>
-                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div className="w-full bg-gray-200/50 rounded-full h-2 overflow-hidden">
                                                     <div 
-                                                        className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(stats.responseRate)}`}
+                                                        className={`h-2 rounded-full transition-all duration-500 ${getProgressColor(stats.responseRate)}`}
                                                         style={{ width: `${stats.responseRate}%` }}
                                                     ></div>
                                                 </div>
-                                                <p className="text-xs text-center text-gray-600">
-                                                    {engagement.level} ({stats.responseRate}%)
-                                                </p>
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <Award className={`w-3 h-3 ${engagement.color.replace('text-', 'fill-current text-')}`} />
+                                                    <p className="text-xs text-center text-gray-600 font-medium">
+                                                        <span className={engagement.color}>{engagement.level}</span> ({stats.responseRate}%)
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     );
@@ -539,50 +558,61 @@ const ParticipantFormationAnalysis = () => {
                         </div>
 
                         {selectedTraining && analysisData && (
-                            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                                <h3 className="text-lg font-bold text-gray-800 mb-4">
-                                    Analyse détaillée - {selectedTraining.title}
-                                </h3>
+                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl flex items-center justify-center">
+                                        <Activity className="w-6 h-6 text-white" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-800">
+                                        Analyse détaillée - {selectedTraining.title}
+                                    </h3>
+                                </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                    <div>
-                                        <h4 className="font-medium text-gray-700 mb-3">Statistiques</h4>
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between">
+                                    <div className="bg-gray-50/50 rounded-xl p-5 border border-gray-200/50">
+                                        <h4 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                                            <BarChart3 className="w-5 h-5 text-blue-500" />
+                                            Statistiques
+                                        </h4>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center p-2 bg-white/50 rounded-lg">
                                                 <span className="text-gray-600">Total réponses:</span>
-                                                <span className="font-medium">{analysisData.statistics.totalResponses}</span>
+                                                <span className="font-bold text-blue-600">{analysisData.statistics.totalResponses}</span>
                                             </div>
-                                            <div className="flex justify-between">
+                                            <div className="flex justify-between items-center p-2 bg-white/50 rounded-lg">
                                                 <span className="text-gray-600">Taux de réponse:</span>
-                                                <span className="font-medium">{analysisData.statistics.responseRate}%</span>
+                                                <span className="font-bold text-green-600">{analysisData.statistics.responseRate}%</span>
                                             </div>
-                                            <div className="flex justify-between">
+                                            <div className="flex justify-between items-center p-2 bg-white/50 rounded-lg">
                                                 <span className="text-gray-600">Score moyen:</span>
-                                                <span className="font-medium">{analysisData.statistics.averageScore}</span>
+                                                <span className="font-bold text-purple-600">{analysisData.statistics.averageScore}</span>
                                             </div>
-                                            <div className="flex justify-between">
+                                            <div className="flex justify-between items-center p-2 bg-white/50 rounded-lg">
                                                 <span className="text-gray-600">Niveau d'engagement:</span>
-                                                <span className={`font-medium ${getEngagementLevel(analysisData.statistics.totalResponses, 10).color}`}>
+                                                <span className={`font-bold ${getEngagementLevel(analysisData.statistics.totalResponses, 10).color}`}>
                                                     {getEngagementLevel(analysisData.statistics.totalResponses, 10).level}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <h4 className="font-medium text-gray-700 mb-3">Distribution des réponses</h4>
-                                        <div className="space-y-2">
+                                    <div className="bg-gray-50/50 rounded-xl p-5 border border-gray-200/50">
+                                        <h4 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                                            <Target className="w-5 h-5 text-orange-500" />
+                                            Distribution des réponses
+                                        </h4>
+                                        <div className="space-y-3">
                                             {Object.entries(analysisData.statistics.responseDistribution).map(([value, count]) => (
-                                                <div key={value} className="flex items-center justify-between">
-                                                    <span className="text-gray-600">{value}:</span>
+                                                <div key={value} className="flex items-center justify-between p-2 bg-white/50 rounded-lg">
+                                                    <span className="text-sm text-gray-600 font-medium">{value}:</span>
                                                     <div className="flex items-center gap-2">
-                                                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                                                        <div className="w-24 bg-gray-200/50 rounded-full h-2 overflow-hidden">
                                                             <div 
-                                                                className="bg-blue-500 h-2 rounded-full"
+                                                                className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-500"
                                                                 style={{ width: `${(count / analysisData.statistics.totalResponses) * 100}%` }}
                                                             ></div>
                                                         </div>
-                                                        <span className="text-sm font-medium">{count}</span>
+                                                        <span className="text-sm font-bold text-gray-700 w-8 text-right">{count}</span>
                                                     </div>
                                                 </div>
                                             ))}
@@ -591,12 +621,15 @@ const ParticipantFormationAnalysis = () => {
                                 </div>
 
                                 {analysisData.statistics.lastActivity && (
-                                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                        <p className="text-sm text-gray-600">
-                                            Dernière activité: <span className="font-medium">
-                                                {new Date(analysisData.statistics.lastActivity.submittedAt).toLocaleString('fr-FR')}
-                                            </span>
-                                        </p>
+                                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200/50">
+                                        <div className="flex items-center gap-3">
+                                            <Clock className="w-5 h-5 text-blue-500" />
+                                            <p className="text-sm text-gray-700">
+                                                Dernière activité: <span className="font-semibold text-blue-700">
+                                                    {new Date(analysisData.statistics.lastActivity.submittedAt).toLocaleString('fr-FR')}
+                                                </span>
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -605,11 +638,11 @@ const ParticipantFormationAnalysis = () => {
                 )}
 
                 {filteredParticipants.length === 0 && (
-                    <div className="text-center py-12">
-                        <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun participant trouvé</h3>
+                    <div className="text-center py-16">
+                        <div className="w-20 h-20 bg-gray-100/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Users className="w-10 h-10 text-gray-400" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucun participant trouvé</h3>
                         <p className="text-gray-500">
                             {searchTerm ? 'Essayez de modifier votre recherche' : 'Aucun participant disponible'}
                         </p>

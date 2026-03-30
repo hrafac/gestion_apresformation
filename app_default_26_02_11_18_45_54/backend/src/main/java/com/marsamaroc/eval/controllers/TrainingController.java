@@ -2,6 +2,7 @@ package com.marsamaroc.eval.controllers;
 
 import com.marsamaroc.eval.dto.TrainingDTO;
 import com.marsamaroc.eval.entities.Training;
+import com.marsamaroc.eval.entities.TrainingStatus;
 import com.marsamaroc.eval.repositories.TrainingRepository;
 import com.marsamaroc.eval.services.TrainingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -260,6 +261,36 @@ public class TrainingController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
                 "error", "Erreur lors de la récupération des formations du formateur: " + e.getMessage(),
                 "formateurId", formateurId
+            ));
+        }
+    }
+
+    // Endpoint pour récupérer le nombre total de formations
+    @GetMapping("/count/total")
+    public ResponseEntity<?> getTotalFormationsCount() {
+        try {
+            long totalFormations = trainingRepository.count();
+            return ResponseEntity.ok(Map.of(
+                "totalFormations", totalFormations
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "error", "Erreur lors de la récupération du nombre total de formations: " + e.getMessage()
+            ));
+        }
+    }
+
+    // Endpoint pour récupérer le nombre de formations terminées
+    @GetMapping("/count/completed")
+    public ResponseEntity<?> getCompletedFormationsCount() {
+        try {
+            long completedFormations = trainingRepository.countByStatus(TrainingStatus.TERMINE);
+            return ResponseEntity.ok(Map.of(
+                "completedFormations", completedFormations
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "error", "Erreur lors de la récupération du nombre de formations terminées: " + e.getMessage()
             ));
         }
     }

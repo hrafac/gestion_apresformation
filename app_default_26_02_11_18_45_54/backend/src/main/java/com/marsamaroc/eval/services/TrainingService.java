@@ -52,8 +52,12 @@ public class TrainingService {
             training.getTrainer().getUsername(); // Force le chargement
         }
         
+        // Forcer le chargement des participants avec lazy loading
         if (training.getParticipants() != null) {
-            training.getParticipants().forEach(p -> p.getUsername()); // Force le chargement
+            training.getParticipants().size(); // Force le chargement de la collection
+            training.getParticipants().forEach(p -> {
+                p.getUsername(); // Force le chargement de chaque participant
+            });
         }
         
         return training;
@@ -69,7 +73,21 @@ public class TrainingService {
         dto.setEndDateTime(t.getEndDate());
         dto.setStatus(calculateStatus(t.getStartDate(), t.getEndDate()));
         dto.setTrainer(t.getTrainer() != null ? toUserShortDTO(t.getTrainer()) : null);
-        dto.setParticipants(t.getParticipants() != null ? toUserShortDTOList(t.getParticipants()) : null);
+        
+        // Gérer le lazy loading pour les participants
+        if (t.getParticipants() != null) {
+            try {
+                // Forcer le chargement si nécessaire
+                t.getParticipants().size();
+                dto.setParticipants(toUserShortDTOList(t.getParticipants()));
+            } catch (Exception e) {
+                // En cas d'erreur de lazy loading, retourner null
+                dto.setParticipants(null);
+            }
+        } else {
+            dto.setParticipants(null);
+        }
+        
         return dto;
     }
 
@@ -104,9 +122,8 @@ public class TrainingService {
 
     // Envoi automatique du lien questionnaire à la fin de la formation
     public String sendQuestionnaireLinkToParticipants(Long trainingId) {
-        // Récupérer la formation
-        Training training = trainingRepository.findById(trainingId)
-            .orElseThrow(() -> new RuntimeException("Formation non trouvée avec l'ID: " + trainingId));
+        // Récupérer la formation avec les participants chargés
+        Training training = getTrainingWithFullUsers(trainingId);
         
         // Vérifier si la formation est terminée
         if (!training.isCompleted()) {
@@ -193,7 +210,9 @@ public class TrainingService {
             if (training.isCompleted()) {
                 completedCount++;
                 try {
-                    Set<User> participants = training.getParticipants();
+                    // Charger la formation avec les participants pour éviter les problèmes de lazy loading
+                    Training trainingWithParticipants = getTrainingWithFullUsers(training.getId());
+                    Set<User> participants = trainingWithParticipants.getParticipants();
                     if (participants != null && !participants.isEmpty()) {
                         // Vérifier si le questionnaire est de type CHAUD pour générer l'URL spécifique
                         // Utiliser une requête directe pour éviter les problèmes de lazy loading

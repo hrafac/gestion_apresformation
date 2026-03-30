@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     List<User> findByRole(Role role);
+    long countByRole(Role role);
     
     @Modifying
     @Transactional

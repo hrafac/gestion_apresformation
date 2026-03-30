@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport d'Analyse IA - Questionnaires</title>
+    <style>
+        body  { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: auto; background: #fff;
+                     padding: 30px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,.1); }
+        h1   { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2   { color: #34495e; margin-top: 30px; }
+        .kpi-box { display: inline-block; background: linear-gradient(135deg,#3498db,#2980b9);
+                    color: #fff; padding: 20px; margin: 10px; border-radius: 10px; min-width: 180px; }
+        .kpi-value { font-size: 36px; font-weight: bold; }
+        .kpi-label { font-size: 14px; opacity: .9; }
+        .good   { background: linear-gradient(135deg,#2ecc71,#27ae60) !important; }
+        .avg    { background: linear-gradient(135deg,#f39c12,#e67e22) !important; }
+        .bad    { background: linear-gradient(135deg,#e74c3c,#c0392b) !important; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th    { background: #3498db; color: #fff; padding: 12px; }
+        td    { padding: 10px; border-bottom: 1px solid #ddd; }
+        tr:hover { background: #f5f5f5; }
+        .card { background: #f8f9fa; border-left: 4px solid #3498db;
+                 padding: 15px; margin: 10px 0; border-radius: 4px; }
+        .card.green  { border-color: #2ecc71; }
+        .card.orange { border-color: #f39c12; }
+        .card.red    { border-color: #e74c3c; }
+        .footer { margin-top: 50px; text-align: center; color: #7f8c8d; font-size: 12px; }
+        .score-bar { background: #ecf0f1; border-radius: 10px; height: 20px; width: 100%; }
+        .score-fill { height: 20px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📊 Rapport d'Analyse Intelligente des Questionnaires</h1>
+    <p>Généré le 25/03/2026 à 17:26</p>
+
+    <h2>📈 Indicateurs Clés</h2>
+    <div class="kpi-box">
+        <div class="kpi-value">60</div>
+        <div class="kpi-label">Réponses totales</div>
+    </div>
+    <div class="kpi-box">
+        <div class="kpi-value">3</div>
+        <div class="kpi-label">Participants</div>
+    </div>
+    <div class="kpi-box">
+        <div class="kpi-value">4</div>
+        <div class="kpi-label">Formations</div>
+    </div><h2>🎯 Évaluation de la Qualité des Formations</h2><table><tr><th>Formation</th><th>Score</th><th>Progression</th><th>Sentiment</th><th>Note num.</th><th>Verdict</th></tr><tr>
+    <td><strong>bbb</strong></td>
+    <td><strong>76.0/100</strong></td>
+    <td>
+        <div class="score-bar">
+            <div class="score-fill" style="width:76.0%;background:#2ecc71;"></div>
+        </div>
+    </td>
+    <td>+0.265</td>
+    <td>N/A</td>
+    <td style="color:#2ecc71;font-weight:bold">✅  BONNE FORMATION</td>
+</tr><tr>
+    <td><strong>jj</strong></td>
+    <td><strong>63.0/100</strong></td>
+    <td>
+        <div class="score-bar">
+            <div class="score-fill" style="width:63.0%;background:#f39c12;"></div>
+        </div>
+    </td>
+    <td>+0.130</td>
+    <td>N/A</td>
+    <td style="color:#f39c12;font-weight:bold">⚠️   FORMATION MOYENNE</td>
+</tr><tr>
+    <td><strong>rrrrr</strong></td>
+    <td><strong>46.4/100</strong></td>
+    <td>
+        <div class="score-bar">
+            <div class="score-fill" style="width:46.4%;background:#f39c12;"></div>
+        </div>
+    </td>
+    <td>-0.040</td>
+    <td>N/A</td>
+    <td style="color:#f39c12;font-weight:bold">❌  FORMATION À AMÉLIORER</td>
+</tr><tr>
+    <td><strong>eee</strong></td>
+    <td><strong>29.2/100</strong></td>
+    <td>
+        <div class="score-bar">
+            <div class="score-fill" style="width:29.2%;background:#e74c3c;"></div>
+        </div>
+    </td>
+    <td>-0.383</td>
+    <td>N/A</td>
+    <td style="color:#e74c3c;font-weight:bold">❌  FORMATION À AMÉLIORER</td>
+</tr></table><h2>🤖 Analyses IA</h2><div class="card">
+    <h3>💬 Analyse de Sentiment</h3>
+    <p>Score moyen : <strong>-0.007</strong></p>
+    <p>Répartition : {'neutre': 56, 'négatif': 3, 'positif': 1}</p>
+</div><div class="card"><h3>📚 Thèmes Détectés</h3><p><strong>Thème 1 :</strong> non, pratiques, certains, formation très, très</p><p><strong>Thème 2 :</strong> ajouter, explications, exemples, manquait, comprendre</p><p><strong>Thème 3 :</strong> contenu, plus, peu, trop, car</p></div><h2>💡 Recommandations</h2><div class='card green'><p>🔴 Réviser les formations : eee</p><p>🟡 Améliorer les formations : rrrrr, jj</p><p>💬 Analyser les 3 commentaires négatifs en détail</p></div>    <div class="footer">
+        <p>Rapport généré automatiquement par le Système Intelligent d'Analyse de Questionnaires</p>
+    </div>
+</div>
+</body>
+</html>
