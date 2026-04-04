@@ -1,8 +1,8 @@
 """
-SYSTÈME INTELLIGENT D'ANALYSE DE QUESTIONNAIRES - VERSION MYSQL
+SYSTÈME INTELLIGENT D'ANALYSE DE QUESTIONNAIRES - VERSION POSTGRESQL
 Auteur: Assistant IA
 Description: Analyse complète des réponses avec IA, statistiques et évaluation
-             automatique de la qualité des formations pour MySQL
+             automatique de la qualité des formations pour PostgreSQL
 """
 
 import pandas as pd
@@ -11,36 +11,36 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import seaborn as sns
 from sqlalchemy import create_engine, text
-import pymysql
+import psycopg2
 import warnings
 import re
 from collections import Counter
 warnings.filterwarnings('ignore')
 
 
-# ==================== 1. CONFIGURATION ET CONNEXION MYSQL ====================
+# ==================== 1. CONFIGURATION ET CONNEXION POSTGRESQL ====================
 
-class MySQLConnector:
-    """Gère la connexion à MySQL et l'extraction des données"""
+class PostgreSQLConnector:
+    """Gère la connexion à PostgreSQL et l'extraction des données"""
 
-    def __init__(self, host, database, user, password, port=3306):
+    def __init__(self, host, database, user, password, port=5432):
         self.host = host
         self.database = database
         self.user = user
         self.password = password
         self.port = port
-        self.connection_string = f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}"
+        self.connection_string = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}"
         self.engine = create_engine(self.connection_string)
 
     def test_connection(self):
-        """Teste la connexion à MySQL"""
+        """Teste la connexion à PostgreSQL"""
         try:
             with self.engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
-                print("[OK] Connexion MySQL établie avec succès")
+                print("[OK] Connexion PostgreSQL établie avec succès")
                 return True
         except Exception as e:
-            print(f"[ERREUR] Erreur de connexion MySQL: {e}")
+            print(f"[ERREUR] Erreur de connexion PostgreSQL: {e}")
             return False
 
     def extract_all_data(self):
@@ -69,12 +69,12 @@ class MySQLConnector:
             q.type as question_type,
             r.id as response_id,
             r.value as response_value
-        FROM user u
+        FROM users u
         INNER JOIN response r ON u.id = r.user_id
         INNER JOIN question q ON r.question_id = q.id
         INNER JOIN questionnaire qn ON q.questionnaire_id = qn.id
         INNER JOIN training t ON r.training_id = t.id
-        LEFT JOIN user trainer ON t.trainer_id = trainer.id
+        LEFT JOIN users trainer ON t.trainer_id = trainer.id
         ORDER BY u.id, r.training_id, q.id;
         """
 
@@ -1283,9 +1283,9 @@ class Visualizer:
         plt.title('Résumé IA', fontweight='bold')
 
         plt.tight_layout()
-        plt.savefig('dashboard_mysql_analyse.png', dpi=300, bbox_inches='tight')
+        plt.savefig('dashboard_postgresql_analyse.png', dpi=300, bbox_inches='tight')
         # plt.show()  # Désactivé pour ne pas afficher le graphique
-        print("[OK] Dashboard sauvegardé → 'dashboard_mysql_analyse.png'")
+        print("[OK] Dashboard sauvegardé → 'dashboard_postgresql_analyse.png'")
 
     def create_training_quality_chart(self):
         """
@@ -1627,9 +1627,9 @@ class ReportGenerator:
 </body>
 </html>"""
 
-        with open('rapport_analyse_mysql.html', 'w', encoding='utf-8') as f:
+        with open('rapport_analyse_postgresql.html', 'w', encoding='utf-8') as f:
             f.write(html)
-        print("[OK] Rapport HTML sauvegardé → 'rapport_analyse_mysql.html'")
+        print("[OK] Rapport HTML sauvegardé → 'rapport_analyse_postgresql.html'")
         return html
 
     def generate_markdown_summary(self):
@@ -1703,11 +1703,11 @@ class ReportGenerator:
 
 # ==================== 7. PIPELINE PRINCIPAL ====================
 
-class MySQLAnalysisPipeline:
+class PostgreSQLAnalysisPipeline:
     """Orchestre l'ensemble du processus d'analyse"""
 
-    def __init__(self, host, database, user, password, port=3306):
-        self.connector      = MySQLConnector(host, database, user, password, port)
+    def __init__(self, host, database, user, password, port=5432):
+        self.connector      = PostgreSQLConnector(host, database, user, password, port)
         self.df             = None
         self.preprocessor   = None
         self.stats_analyzer = None
@@ -1717,11 +1717,11 @@ class MySQLAnalysisPipeline:
 
     def run_complete_analysis(self):
         print("=" * 70)
-        print("[SYSTEM] SYSTÈME INTELLIGENT D'ANALYSE DE QUESTIONNAIRES - MySQL")
+        print("[SYSTEM] SYSTÈME INTELLIGENT D'ANALYSE DE QUESTIONNAIRES - PostgreSQL")
         print("=" * 70)
 
         # Étape 1 : Connexion
-        print("\n[ETAPE 1] Connexion à MySQL")
+        print("\n[ETAPE 1] Connexion à PostgreSQL")
         if not self.connector.test_connection():
             print("[ERREUR] Connexion échouée. Arrêt.")
             return
@@ -1774,7 +1774,7 @@ class MySQLAnalysisPipeline:
         # print("  📊 dashboard_mysql_analyse.png")
         # print("  🎯 formation_quality_chart.png")
         # print("  💬 sentiment_analysis_chart.png")
-        print("  📄 rapport_analyse_mysql.html")
+        print("  📄 rapport_analyse_postgresql.html")
         print("  📝 resume_analyse.md")
 
         return self
@@ -1783,20 +1783,20 @@ class MySQLAnalysisPipeline:
 # ==================== 8. POINT D'ENTRÉE ====================
 
 if __name__ == "__main__":
-    MYSQL_CONFIG = {
+    POSTGRESQL_CONFIG = {
         'host':     'localhost',
         'database': 'marsa_eval',
-        'user':     'root',
-        'password': '',
-        'port':     3306
+        'user':     'postgres',
+        'password': 'password',
+        'port':     5432
     }
 
-    print("[CONFIG] CONFIGURATION MYSQL")
-    for k, v in MYSQL_CONFIG.items():
+    print("[CONFIG] CONFIGURATION POSTGRESQL")
+    for k, v in POSTGRESQL_CONFIG.items():
         if k != 'password':
             print(f"  {k}: {v}")
 
-    pipeline = MySQLAnalysisPipeline(**MYSQL_CONFIG)
+    pipeline = PostgreSQLAnalysisPipeline(**POSTGRESQL_CONFIG)
 
     try:
         results = pipeline.run_complete_analysis()

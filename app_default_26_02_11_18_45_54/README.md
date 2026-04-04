@@ -11,11 +11,11 @@ Ce projet est une solution complète pour la gestion et l'analyse des évaluatio
 ## Prérequis
 - **Java 17** ou supérieur.
 - **Node.js 18** ou supérieur.
-- **MySQL 8.0**.
+- **PostgreSQL**.
 
 ## Installation du Backend
 1. Naviguer dans le dossier `backend`.
-2. Créer une base de données MySQL nommée `marsa_eval`.
+2. Créer une base de données PostgreSQL nommée `marsa_eval`.
 3. Configurer les identifiants dans `src/main/resources/application.properties`.
 4. Exécuter le projet :
     `./mvnw spring-boot:run`

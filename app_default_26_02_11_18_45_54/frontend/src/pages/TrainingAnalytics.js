@@ -23,6 +23,26 @@ const TrainingAnalytics = () => {
         participantCount: 0,
         completedFormations: 0
     });
+    const [analysisServiceStatus, setAnalysisServiceStatus] = useState('unknown'); // 'available', 'unavailable', 'unknown'
+
+    // Health check pour le service d'analyse
+    const checkAnalysisServiceHealth = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            const isHealthy = response.ok;
+            setAnalysisServiceStatus(isHealthy ? 'available' : 'unavailable');
+            return isHealthy;
+        } catch (err) {
+            console.warn('Analysis service health check failed:', err);
+            setAnalysisServiceStatus('unavailable');
+            return false;
+        }
+    };
 
     // Enregistrer les composants Chart.js
     ChartJS.register(
@@ -107,10 +127,13 @@ const TrainingAnalytics = () => {
     // Charger les statistiques au démarrage
     useEffect(() => {
         loadInitialStats();
+        // Vérifier le statut du service d'analyse
+        checkAnalysisServiceHealth();
     }, []);
 
     const loadInitialStats = async () => {
         try {
+            // Charger les statistiques de base depuis le service principal (port 8080)
             const [participantCount, totalFormations, completedFormations] = await Promise.all([
                 getParticipantCount(),
                 getTotalFormations(),
@@ -123,14 +146,29 @@ const TrainingAnalytics = () => {
                 participantCount: participantCount,
                 completedFormations: completedFormations
             });
+
+            // Essayer de charger les données d'analyse si le service est disponible
+            try {
+                const isServiceHealthy = await checkAnalysisServiceHealth();
+                if (isServiceHealthy) {
+                    await handleGetAnalysisInfo();
+                }
+            } catch (analysisErr) {
+                console.warn('Analysis service not available on load:', analysisErr);
+                // Ne pas échouer le chargement initial si le service d'analyse n'est pas disponible
+            }
         } catch (err) {
             console.error('Error loading initial stats:', err);
             // En cas d'erreur, essayer au moins de récupérer le nombre de participants
-            const participantCount = await getParticipantCount();
-            setStats(prev => ({
-                ...prev,
-                participantCount: participantCount
-            }));
+            try {
+                const participantCount = await getParticipantCount();
+                setStats(prev => ({
+                    ...prev,
+                    participantCount: participantCount
+                }));
+            } catch (fallbackErr) {
+                console.error('Failed to load even basic stats:', fallbackErr);
+            }
         }
     };
 
@@ -140,6 +178,12 @@ const TrainingAnalytics = () => {
         setResult(null);
 
         try {
+            // Vérifier si le service d'analyse est disponible
+            const isServiceHealthy = await checkAnalysisServiceHealth();
+            if (!isServiceHealthy) {
+                throw new Error('Le service d\'analyse n\'est pas disponible. Veuillez vérifier que le service sur le port 8000 est en cours d\'exécution.');
+            }
+
             // D'abord faire le POST pour lancer l'analyse
             const postResponse = await fetch('http://localhost:8000/analyze', {
                 method: 'POST',
@@ -150,9 +194,9 @@ const TrainingAnalytics = () => {
                     database_config: {
                         host: "localhost",
                         database: "marsa_eval",
-                        user: "root",
-                        password: "",
-                        port: 3306
+                        user: "postgres",
+                        password: "password",
+                        port: 5432
                     },
                     analysis_type: "full",
                     n_topics: 3,
@@ -167,16 +211,44 @@ const TrainingAnalytics = () => {
             const postData = await postResponse.json();
             setResult(postData);
             
-            // Ensuite faire le GET pour récupérer les informations
-            const getResponse = await fetch('http://localhost:8000/analyze', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
+            // Attendre un peu pour que l'analyse se lance
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Ensuite faire le GET pour récupérer les informations avec retry
+            let getResponse;
+            let retries = 3;
+            let success = false;
+            
+            while (retries > 0 && !success) {
+                try {
+                    getResponse = await fetch('http://localhost:8000/analyze', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
 
-            if (!getResponse.ok) {
-                throw new Error(`GET HTTP error! status: ${getResponse.status}`);
+                    if (getResponse.ok) {
+                        success = true;
+                    } else if (getResponse.status === 404) {
+                        // Si 404, attendre et réessayer
+                        await new Promise(resolve => setTimeout(resolve, 3000));
+                        retries--;
+                    } else {
+                        throw new Error(`GET HTTP error! status: ${getResponse.status}`);
+                    }
+                } catch (err) {
+                    if (retries > 1) {
+                        await new Promise(resolve => setTimeout(resolve, 3000));
+                        retries--;
+                    } else {
+                        throw err;
+                    }
+                }
+            }
+            
+            if (!success) {
+                throw new Error('L\'analyse n\'a pas pu être récupérée après plusieurs tentatives');
             }
 
             const getData = await getResponse.json();
@@ -219,8 +291,45 @@ const TrainingAnalytics = () => {
             console.log('GET Analysis info:', getData);
             console.log('Final result set:', getData);
         } catch (err) {
-            setError(err.message);
             console.error('Analysis error:', err);
+            setError(err.message);
+            
+            // Fallback: utiliser les statistiques de base même si l'analyse échoue
+            try {
+                const [participantCount, totalFormations, completedFormations] = await Promise.all([
+                    getParticipantCount(),
+                    getTotalFormations(),
+                    getCompletedFormations()
+                ]);
+                
+                setStats({
+                    totalFormations: totalFormations,
+                    totalUsers: participantCount, // Utiliser participantCount comme fallback
+                    participantCount: participantCount,
+                    completedFormations: completedFormations
+                });
+                
+                setResult({
+                    graphs: {
+                        verdicts_distribution: {
+                            labels: ['Données limitées'],
+                            values: [1],
+                            percentages: [100]
+                        }
+                    },
+                    data: {
+                        quality_by_formation: [],
+                        top_comments: {
+                            positifs: ['Service d\'analyse temporairement indisponible'],
+                            negatifs: []
+                        }
+                    }
+                });
+                
+                console.log('Fallback stats loaded successfully');
+            } catch (fallbackErr) {
+                console.error('Fallback also failed:', fallbackErr);
+            }
         } finally {
             setLoading(false);
         }
@@ -231,15 +340,46 @@ const TrainingAnalytics = () => {
         setError(null);
 
         try {
-            const response = await fetch('http://localhost:8000/analyze', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
+            // Vérifier si le service d'analyse est disponible
+            const isServiceHealthy = await checkAnalysisServiceHealth();
+            if (!isServiceHealthy) {
+                throw new Error('Le service d\'analyse n\'est pas disponible. Veuillez vérifier que le service sur le port 8000 est en cours d\'exécution.');
+            }
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            let response;
+            let retries = 3;
+            let success = false;
+            
+            while (retries > 0 && !success) {
+                try {
+                    response = await fetch('http://localhost:8000/analyze', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (response.ok) {
+                        success = true;
+                    } else if (response.status === 404) {
+                        // Si 404, attendre et réessayer
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        retries--;
+                    } else {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                } catch (err) {
+                    if (retries > 1) {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        retries--;
+                    } else {
+                        throw err;
+                    }
+                }
+            }
+            
+            if (!success) {
+                throw new Error('Impossible de récupérer les informations d\'analyse après plusieurs tentatives');
             }
 
             const data = await response.json();
@@ -272,6 +412,26 @@ const TrainingAnalytics = () => {
         } catch (err) {
             setError(err.message);
             console.error('Get analysis info error:', err);
+            
+            // Fallback: charger les statistiques de base
+            try {
+                const [participantCount, totalFormations, completedFormations] = await Promise.all([
+                    getParticipantCount(),
+                    getTotalFormations(),
+                    getCompletedFormations()
+                ]);
+                
+                setStats({
+                    totalFormations: totalFormations,
+                    totalUsers: participantCount,
+                    participantCount: participantCount,
+                    completedFormations: completedFormations
+                });
+                
+                console.log('Fallback stats loaded in handleGetAnalysisInfo');
+            } catch (fallbackErr) {
+                console.error('Fallback failed in handleGetAnalysisInfo:', fallbackErr);
+            }
         } finally {
             setLoading(false);
         }
@@ -792,11 +952,26 @@ const TrainingAnalytics = () => {
                 {/* Bouton d'analyse */}
                 <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 backdrop-blur-lg bg-opacity-95">
                     <div className="text-center">
+                        {/* Indicateur de statut du service d'analyse */}
+                        <div className="mb-4 flex items-center justify-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${
+                                analysisServiceStatus === 'available' ? 'bg-green-500' : 
+                                analysisServiceStatus === 'unavailable' ? 'bg-red-500' : 'bg-yellow-500'
+                            }`}></div>
+                            <span className="text-sm text-gray-600">
+                                Service d'analyse: {
+                                    analysisServiceStatus === 'available' ? 'Disponible' :
+                                    analysisServiceStatus === 'unavailable' ? 'Indisponible' :
+                                    'Vérification...'
+                                }
+                            </span>
+                        </div>
+                        
                         <button
                             onClick={handleAnalyze}
-                            disabled={loading}
+                            disabled={loading || analysisServiceStatus === 'unavailable'}
                             className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform ${
-                                loading
+                                loading || analysisServiceStatus === 'unavailable'
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed scale-95'
                                     : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 hover:scale-105 shadow-lg hover:shadow-xl'
                             }`}
@@ -818,6 +993,15 @@ const TrainingAnalytics = () => {
                         {error && (
                             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                                 <p className="text-red-600 text-center">{error}</p>
+                            </div>
+                        )}
+                        
+                        {analysisServiceStatus === 'unavailable' && !error && (
+                            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <p className="text-yellow-700 text-center text-sm">
+                                    Le service d'analyse avancée n'est pas disponible. 
+                                    Les statistiques de base sont toujours fonctionnelles.
+                                </p>
                             </div>
                         )}
                     </div>

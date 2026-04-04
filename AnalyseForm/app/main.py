@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 # Import des classes existantes
 import sys
 sys.path.append('.')
-from ana import MySQLConnector, DataPreprocessor, StatisticalAnalyzer, AIAnalyzer, Visualizer, ReportGenerator, MySQLAnalysisPipeline
+from ana import PostgreSQLConnector, DataPreprocessor, StatisticalAnalyzer, AIAnalyzer, Visualizer, ReportGenerator, PostgreSQLAnalysisPipeline
 
 app = FastAPI(
     title="Questionnaire Analysis API",
@@ -44,7 +44,7 @@ class DatabaseConfig(BaseModel):
     database: str
     user: str
     password: str
-    port: int = 3306
+    port: int = 5432
 
 class AnalysisRequest(BaseModel):
     database_config: DatabaseConfig
@@ -110,7 +110,7 @@ async def analyze_data(
     background_tasks: BackgroundTasks
 ):
     """
-    Lance une analyse complète des données depuis MySQL
+    Lance une analyse complète des données depuis PostgreSQL
     """
     try:
         # Création de l'ID d'analyse
@@ -354,7 +354,7 @@ async def get_html_report(analysis_id: Optional[str] = None):
             if 'reporter' in results:
                 results['reporter'].generate_html_report()
                 return FileResponse(
-                    'rapport_analyse_mysql.html',
+                    'rapport_analyse_postgresql.html',
                     media_type='text/html',
                     filename=f'rapport_analyse_{analysis_id}.html'
                 )
@@ -363,7 +363,7 @@ async def get_html_report(analysis_id: Optional[str] = None):
         if last_analysis:
             last_analysis.reporter.generate_html_report()
             return FileResponse(
-                'rapport_analyse_mysql.html',
+                'rapport_analyse_postgresql.html',
                 media_type='text/html',
                 filename='rapport_analyse_latest.html'
             )
@@ -410,9 +410,9 @@ async def get_dashboard_image():
     """
     Récupère l'image du tableau de bord
     """
-    if os.path.exists('dashboard_mysql_analyse.png'):
+    if os.path.exists('dashboard_postgresql_analyse.png'):
         return FileResponse(
-            'dashboard_mysql_analyse.png',
+            'dashboard_postgresql_analyse.png',
             media_type='image/png',
             filename='dashboard.png'
         )
@@ -607,7 +607,7 @@ def run_analysis_background(analysis_id, db_config, analysis_type, n_topics, con
         analysis_cache[analysis_id] = {"status": "running", "progress": 0}
         
         # Création du pipeline
-        pipeline = MySQLAnalysisPipeline(
+        pipeline = PostgreSQLAnalysisPipeline(
             host=db_config.host,
             database=db_config.database,
             user=db_config.user,
