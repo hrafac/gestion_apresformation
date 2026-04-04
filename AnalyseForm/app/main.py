@@ -40,7 +40,7 @@ app.add_middleware(
 
 # Modèles Pydantic
 class DatabaseConfig(BaseModel):
-    host: str = "localhost"
+    host: str = "postgres"
     database: str
     user: str
     password: str
@@ -605,6 +605,9 @@ def run_analysis_background(analysis_id, db_config, analysis_type, n_topics, con
     """
     try:
         analysis_cache[analysis_id] = {"status": "running", "progress": 0}
+        
+        # Debug: afficher la configuration reçue
+        print(f"[DEBUG] Configuration reçue: host={db_config.host}, port={db_config.port}, database={db_config.database}")
         
         # Création du pipeline
         pipeline = PostgreSQLAnalysisPipeline(

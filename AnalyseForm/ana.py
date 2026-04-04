@@ -15,6 +15,7 @@ import psycopg2
 import warnings
 import re
 from collections import Counter
+import os
 warnings.filterwarnings('ignore')
 
 
@@ -31,6 +32,9 @@ class PostgreSQLConnector:
         self.port = port
         self.connection_string = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}"
         self.engine = create_engine(self.connection_string)
+        
+        # Debug: afficher les paramètres de connexion
+        print(f"[DEBUG] Connexion à PostgreSQL: host={host}, port={port}, database={database}, user={user}")
 
     def test_connection(self):
         """Teste la connexion à PostgreSQL"""
@@ -1784,10 +1788,10 @@ class PostgreSQLAnalysisPipeline:
 
 if __name__ == "__main__":
     POSTGRESQL_CONFIG = {
-        'host':     'localhost',
-        'database': 'marsa_eval',
-        'user':     'postgres',
-        'password': 'password',
+        'host':     os.getenv('POSTGRES_HOST', 'postgres'),
+        'database': os.getenv('POSTGRES_DB', 'marsa_eval'),
+        'user':     os.getenv('POSTGRES_USER', 'postgres'),
+        'password': os.getenv('POSTGRES_PASSWORD', 'password'),
         'port':     5432
     }
 

@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: marsa_eval_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+
+  backend:
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/marsa_eval_dev
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+    volumes:
+      - ./app_default_26_02_11_18_45_54/backend/src:/app/src
+      - ./app_default_26_02_11_18_45_54/backend/target:/app/target
+    command: ["./mvnw", "spring-boot:run"]
+
+  frontend:
+    volumes:
+      - ./app_default_26_02_11_18_45_54/frontend/src:/app/src
+      - ./app_default_26_02_11_18_45_54/frontend/public:/app/public
+    build:
+      context: ./app_default_26_02_11_18_45_54/frontend
+      dockerfile: Dockerfile.dev
+
+  analyse-form:
+    environment:
+      - PYTHONPATH=/app
+      - DEBUG=1
+    volumes:
+      - ./AnalyseForm:/app
+      - analyse_reports:/app/reports
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

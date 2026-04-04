@@ -28,7 +28,7 @@ const TrainingAnalytics = () => {
     // Health check pour le service d'analyse
     const checkAnalysisServiceHealth = async () => {
         try {
-            const response = await fetch('http://localhost:8000/', {
+            const response = await fetch('http://analyse-form:8000/', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ const TrainingAnalytics = () => {
     const getParticipantCount = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:8080/api/auth/users/participants/count', {
+            const response = await fetch('http://backend:8080/api/auth/users/participants/count', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ const TrainingAnalytics = () => {
     const getTotalFormations = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:8080/api/training/count/total', {
+            const response = await fetch('http://backend:8080/api/training/count/total', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ const TrainingAnalytics = () => {
     const getCompletedFormations = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:8080/api/training/count/completed', {
+            const response = await fetch('http://backend:8080/api/training/count/completed', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -185,14 +185,14 @@ const TrainingAnalytics = () => {
             }
 
             // D'abord faire le POST pour lancer l'analyse
-            const postResponse = await fetch('http://localhost:8000/analyze', {
+            const postResponse = await fetch('http://analyse-form:8000/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     database_config: {
-                        host: "localhost",
+                        host: "postgres",
                         database: "marsa_eval",
                         user: "postgres",
                         password: "password",
@@ -221,7 +221,7 @@ const TrainingAnalytics = () => {
             
             while (retries > 0 && !success) {
                 try {
-                    getResponse = await fetch('http://localhost:8000/analyze', {
+                    getResponse = await fetch('http://analyse-form:8000/analyze', {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
@@ -352,7 +352,7 @@ const TrainingAnalytics = () => {
             
             while (retries > 0 && !success) {
                 try {
-                    response = await fetch('http://localhost:8000/analyze', {
+                    response = await fetch('http://analyse-form:8000/analyze', {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
