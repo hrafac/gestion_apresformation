@@ -1,0 +1,53 @@
+services:
+  # Service Backend Spring Boot
+  - type: web
+    name: gestion-apresformation-backend
+    env: docker
+    dockerfilePath: ./Dockerfile.render
+    dockerContext: .
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: ${DATABASE_URL}
+      - key: SPRING_DATASOURCE_USERNAME
+        value: ${DB_USER}
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: ${DB_PASSWORD}
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
+      - key: APP_JWT_SECRET
+        generateValue: true
+      - key: APP_JWT_EXPIRATION_MS
+        value: 86400000
+      - key: SERVER_PORT
+        value: 8080
+
+  # Service Frontend React (optionnel)
+  - type: web
+    name: gestion-apresformation-frontend
+    env: static
+    buildCommand: "cd app_default_26_02_11_18_45_54/frontend && npm install && npm run build"
+    publishPath: app_default_26_02_11_18_45_54/frontend/build
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://gestion-apresformation-backend.onrender.com
+
+  # Service Analyse Python (optionnel)
+  - type: web
+    name: gestion-apresformation-analyse
+    env: docker
+    dockerfilePath: ./AnalyseForm/Dockerfile
+    dockerContext: ./AnalyseForm
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHONPATH
+        value: /app
+      - key: PYTHONUNBUFFERED
+        value: 1
+
+# Base de données PostgreSQL
+databases:
+  - name: gestion-apresformation-db
+    databaseName: marsa_eval
+    user: postgres
