@@ -1,0 +1,20 @@
+# Dockerfile pour Render - Backend Spring Boot
+FROM eclipse-temurin:17-jdk-alpine
+
+WORKDIR /app
+
+# Installer Maven
+RUN apk add --no-cache maven
+
+# Copier les fichiers Maven
+COPY app_default_26_02_11_18_45_54/backend/pom.xml .
+COPY app_default_26_02_11_18_45_54/backend/src ./src
+
+# Builder l'application
+RUN mvn package -DskipTests
+
+# Exposer le port
+EXPOSE 8080
+
+# Lancer l'application
+ENTRYPOINT ["java", "-jar", "target/eval-0.0.1-SNAPSHOT.jar"]
