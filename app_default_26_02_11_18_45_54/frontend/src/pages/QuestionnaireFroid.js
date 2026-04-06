@@ -77,7 +77,7 @@ const QuestionnaireFroid = () => {
 
     const fetchQuestionnairesFroid = async () => {
         try {
-            const response = await axios.get('http://backend:8080/public/questionnaireFroid');
+            const response = await axios.get('https://gestion-apresformation.onrender.com/public/questionnaireFroid');
             setQuestionnaires(response.data);
             setLoading(false);
         } catch (err) {

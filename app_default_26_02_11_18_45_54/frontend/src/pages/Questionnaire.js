@@ -19,7 +19,7 @@ const Questionnaire = () => {
 
     const fetchQuestionnaires = async () => {
         try {
-            const response = await axios.get('http://backend:8080/public/questionnaireChaud');
+            const response = await axios.get('https://gestion-apresformation.onrender.com/public/questionnaireChaud');
             setQuestionnaires(response.data);
             setLoading(false);
         } catch (err) {
@@ -66,7 +66,7 @@ const Questionnaire = () => {
             }));
 
             // Envoyer les réponses
-            await axios.post('http://backend:8080/api/response/submit', responses);
+            await axios.post('https://gestion-apresformation.onrender.com/api/response/submit', responses);
             
             setSubmitted(true);
             alert('Questionnaire soumis avec succès !');
