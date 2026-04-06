@@ -40,10 +40,10 @@ app.add_middleware(
 
 # Modèles Pydantic
 class DatabaseConfig(BaseModel):
-    host: str = "postgres"
-    database: str
-    user: str
-    password: str
+    host: str = "dpg-d79f5jbuibrs73c5ugs0-a.oregon-postgres.render.com"
+    database: str = "marsa_eval"
+    user: str = "marsa_user"
+    password: str = "HaQUe0hlwZvaS2MPn6egMB1l2JdeWcIf"
     port: int = 5432
 
 class AnalysisRequest(BaseModel):

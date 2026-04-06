@@ -1788,10 +1788,10 @@ class PostgreSQLAnalysisPipeline:
 
 if __name__ == "__main__":
     POSTGRESQL_CONFIG = {
-        'host':     os.getenv('POSTGRES_HOST', 'postgres'),
+        'host':     os.getenv('POSTGRES_HOST', 'dpg-d79f5jbuibrs73c5ugs0-a.oregon-postgres.render.com'),
         'database': os.getenv('POSTGRES_DB', 'marsa_eval'),
-        'user':     os.getenv('POSTGRES_USER', 'postgres'),
-        'password': os.getenv('POSTGRES_PASSWORD', 'password'),
+        'user':     os.getenv('POSTGRES_USER', 'marsa_user'),
+        'password': os.getenv('POSTGRES_PASSWORD', 'HaQUe0hlwZvaS2MPn6egMB1l2JdeWcIf'),
         'port':     5432
     }
 
