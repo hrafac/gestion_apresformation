@@ -111,24 +111,24 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center p-2 sm:p-4 relative overflow-hidden mobile-full-width" style={{ backgroundImage: 'url("/logo2.png")' }}>
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center p-4 relative overflow-hidden" style={{ backgroundImage: 'url("/logo2.png")' }}>
       {/* Overlay for better text visibility */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
       
-      <div className="bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md border border-white/20 relative z-10 mobile-card">
+      <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 w-full max-w-md border border-white/20 relative z-10">
         {/* Glassmorphism card */}
-        <div className="bg-white/5 rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 border border-white/10">
+        <div className="bg-white/5 rounded-2xl p-6 mb-6 border border-white/10">
           {/* Progress Bar */}
-          <div className="mb-4 sm:mb-6">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <span className="text-xs sm:text-sm font-semibold text-white/90 mobile-text-xs">Étape {step} sur 2</span>
-              <span className="text-xs sm:text-sm text-white/70 mobile-text-xs">
-                {step === 1 ? 'Informations' : 'Sécurité'}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold text-white/90">Étape {step} sur 2</span>
+              <span className="text-sm text-white/70">
+                {step === 1 ? 'Informations personnelles' : 'Sécurité'}
               </span>
             </div>
-            <div className="w-full bg-white/20 rounded-full h-2 sm:h-3 backdrop-blur-sm">
+            <div className="w-full bg-white/20 rounded-full h-3 backdrop-blur-sm">
               <div 
-                className="bg-gradient-to-r from-blue-400 to-blue-500 h-2 sm:h-3 rounded-full transition-all duration-500 shadow-lg"
+                className="bg-gradient-to-r from-blue-400 to-blue-500 h-3 rounded-full transition-all duration-500 shadow-lg"
                 style={{ width: step === 1 ? '50%' : '100%' }}
               />
             </div>
@@ -137,15 +137,15 @@ const Register = () => {
           {/* Logo */}
           
 
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 text-center mobile-text-sm">
+          <h2 className="text-3xl font-bold text-white mb-2 text-center">
             {step === 1 ? 'Créer votre compte' : 'Sécurisez votre compte'}
           </h2>
-          <p className="text-white/70 text-center mb-6 sm:mb-8 text-sm sm:text-base mobile-text-xs">
+          <p className="text-white/70 text-center mb-8">
             {step === 1 ? 'Entrez vos informations personnelles' : 'Choisissez un mot de passe sécurisé'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {step === 1 ? (
             <>
               <div className="group">

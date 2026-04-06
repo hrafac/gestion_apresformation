@@ -139,74 +139,72 @@ const UserManagement = () => {
     }
 
     return (
-        <div className="space-y-4 sm:space-y-6 p-2 sm:p-4">
+        <div className="space-y-6 p-4">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mobile-stack">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mobile-text-sm">Gestion des utilisateurs</h1>
-                    <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base mobile-text-xs">Gérez tous les utilisateurs de la plateforme</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Gestion des utilisateurs</h1>
+                    <p className="text-gray-600 mt-2">Gérez tous les utilisateurs de la plateforme</p>
                 </div>
                 <button
                     onClick={() => setShowAddModal(true)}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors mobile-full-width justify-center sm:justify-start"
+                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center"
                 >
-                    <Plus size={16} className="sm:w-5 sm:h-5" />
-                    <span className="text-sm sm:text-base">Ajouter</span>
+                    <Plus size={20} />
+                    Ajouter un utilisateur
                 </button>
             </div>
 
             {/* Search and Filters */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 mobile-card">
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mobile-stack">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1 relative">
-                        <Search size={16} className="sm:w-5 sm:h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Rechercher..."
+                            placeholder="Rechercher par nom, email ou rôle..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 sm:pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mobile-full-width"
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </div>
-                    <button className="flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors mobile-full-width justify-center sm:justify-start">
-                        <Filter size={16} className="sm:w-5 sm:h-5" />
-                        <span className="hidden sm:inline">Filtres</span>
-                        <span className="sm:hidden">Filtrer</span>
+                    <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors w-full sm:w-auto justify-center">
+                        <Filter size={20} />
+                        Filtres
                     </button>
                 </div>
             </div>
 
             {/* Error Message */}
             {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4 flex items-center gap-3 mobile-card">
-                    <AlertCircle size={16} className="sm:w-5 sm:h-5 text-red-500" />
-                    <span className="text-red-700 text-sm sm:text-base mobile-text-xs">{error}</span>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+                    <AlertCircle size={20} className="text-red-500" />
+                    <span className="text-red-700">{error}</span>
                 </div>
             )}
 
             {/* Users Table */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mobile-card">
-                <div className="overflow-x-auto mobile-table">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-50 border-b border-gray-200">
                             <tr>
-                                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider mobile-text-xs">
-                                    <span className="hidden sm:inline">Utilisateur</span>
-                                    <span className="sm:hidden">Nom</span>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Utilisateur
                                 </th>
-                                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider mobile-text-xs mobile-hidden">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                                     Email
                                 </th>
-                                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider mobile-text-xs">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Rôle
                                 </th>
-                                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider mobile-text-xs mobile-hidden">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                                     Statut
                                 </th>
-                                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider mobile-text-xs mobile-hidden">
-                                    Date
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                                    Date d'inscription
                                 </th>
-                                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider mobile-text-xs">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Actions
                                 </th>
                             </tr>
@@ -214,60 +212,60 @@ const UserManagement = () => {
                         <tbody className="bg-white divide-y divide-gray-200">
                             {filteredUsers.map((user) => (
                                 <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                                                <UserIcon size={12} className="sm:w-4 sm:h-4 text-white" />
+                                            <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
+                                                <UserIcon size={16} className="text-white" />
                                             </div>
-                                            <div className="ml-2 sm:ml-4">
-                                                <div className="text-xs sm:text-sm font-medium text-gray-900 mobile-text-xs">
+                                            <div className="ml-4">
+                                                <div className="text-sm font-medium text-gray-900">
                                                     {user.fullName || 'N/A'}
                                                 </div>
-                                                <div className="sm:hidden text-xs text-gray-500 mobile-text-xs">
+                                                <div className="sm:hidden text-xs text-gray-500">
                                                     {user.email || 'N/A'}
                                                 </div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap mobile-hidden">
-                                        <div className="flex items-center text-xs sm:text-sm text-gray-900">
-                                            <Mail size={12} className="sm:w-4 sm:h-4 mr-1 sm:mr-2 text-gray-400" />
+                                    <td className="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                                        <div className="flex items-center text-sm text-gray-900">
+                                            <Mail size={16} className="mr-2 text-gray-400" />
                                             {user.email || 'N/A'}
                                         </div>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                                        <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(user.role)}`}>
-                                            <Shield size={10} className="sm:w-3 sm:h-3 mr-1" />
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(user.role)}`}>
+                                            <Shield size={12} className="mr-1" />
                                             {user.role || 'N/A'}
                                         </span>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap mobile-hidden">
-                                        <div className="flex items-center text-xs sm:text-sm text-gray-900">
+                                    <td className="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                                        <div className="flex items-center text-sm text-gray-900">
                                             {getStatusIcon(user.active)}
                                             <span className="ml-2">{user.active ? 'Actif' : 'Inactif'}</span>
                                         </div>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap mobile-hidden">
-                                        <div className="flex items-center text-xs sm:text-sm text-gray-900">
-                                            <Calendar size={12} className="sm:w-4 sm:h-4 mr-1 sm:mr-2 text-gray-400" />
+                                    <td className="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                                        <div className="flex items-center text-sm text-gray-900">
+                                            <Calendar size={16} className="mr-2 text-gray-400" />
                                             {user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR') : 'N/A'}
                                         </div>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                                        <div className="flex items-center gap-1 sm:gap-2">
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => handleEditUser(user)}
-                                                className="p-1 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                                 title="Modifier"
                                             >
-                                                <Edit size={12} className="sm:w-4 sm:h-4" />
+                                                <Edit size={16} />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteUser(user.id)}
-                                                className="p-1 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                 title="Supprimer"
                                             >
-                                                <Trash2 size={12} className="sm:w-4 sm:h-4" />
+                                                <Trash2 size={16} />
                                             </button>
                                         </div>
                                     </td>
