@@ -37,7 +37,7 @@ const UserManagement = () => {
 
     const updateUser = async (userId, userData) => {
         try {
-            const response = await axios.put(`/auth/users/${userId}`, userData);
+            const response = await axios.patch(`/auth/users/${userId}`, userData);
             setUsers(users.map(user => 
                 user.id === userId ? response.data : user
             ));
