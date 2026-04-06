@@ -25,9 +25,10 @@ services:
   # Service Frontend React
   - type: web
     name: gestion-apresformation-frontend
-    env: docker
-    dockerfilePath: ./app_default_26_02_11_18_45_54/frontend/Dockerfile
-    dockerContext: ./app_default_26_02_11_18_45_54/frontend
+    env: static
+    buildCommand: "npm install && npm run build"
+    publishPath: build
+    rootDir: app_default_26_02_11_18_45_54/frontend
     routes:
       - type: rewrite
         source: /api/*
