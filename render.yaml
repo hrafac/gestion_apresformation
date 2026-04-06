@@ -32,7 +32,7 @@ services:
     routes:
       - type: rewrite
         source: /api/*
-        destination: https://gestion-apresformation-backend.onrender.com
+        destination: https://gestion-apresformation.onrender.com
 
   # Service Analyse Python (désactivé pour le moment)
   # - type: web
