@@ -21,6 +21,12 @@ services:
         value: 86400000
       - key: SERVER_PORT
         value: 8080
+      - key: DATABASE_URL
+        value: jdbc:postgresql://dpg-d79f5jbuibrs73c5ugs0-a.oregon-postgres.render.com:5432/marsa_eval
+      - key: DB_USER
+        value: marsa_user
+      - key: DB_PASSWORD
+        value: HaQUe@hlwZvaS2MPn6egMB112JdeWcIf
 
   # Service Frontend React (optionnel)
   - type: web
