@@ -9,3 +9,67 @@ body {
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
       sans-serif;
 }
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* Custom responsive variables */
+:root {
+    --mobile-breakpoint: 640px;
+    --tablet-breakpoint: 768px;
+    --desktop-breakpoint: 1024px;
+}
+
+/* Ensure proper viewport scaling */
+html {
+    touch-action: manipulation;
+}
+
+/* Better mobile scrolling */
+body {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent horizontal overflow on mobile */
+* {
+    max-width: 100%;
+}
+
+/* Better button sizing on mobile */
+button {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* Better form inputs on mobile */
+input, textarea, select {
+    min-height: 44px;
+}
+
+/* Better focus states for touch devices */
+@media (hover: none) {
+    button:hover,
+    a:hover {
+        opacity: 0.8;
+    }
+}
+
+/* Hide desktop-only elements on mobile */
+@media (max-width: 1023px) {
+    .desktop-only {
+        display: none !important;
+    }
+}
+
+/* Hide mobile-only elements on desktop */
+@media (min-width: 1024px) {
+    .mobile-only {
+        display: none !important;
+    }
+}
