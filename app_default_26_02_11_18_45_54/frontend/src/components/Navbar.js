@@ -412,13 +412,7 @@ const Navbar = ({ children }) => {
                                     <h1 className="text-lg sm:text-2xl font-bold text-gray-800 truncate">Dashboard</h1>
                                 </div>
                                 <div className="flex items-center gap-2 sm:gap-4">
-                                    <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                                        <Moon size={20} className="text-gray-600" />
-                                    </button>
-                                    <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative">
-                                        <Bell size={20} className="text-gray-600" />
-                                        <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                                    </button>
+                                 
                                     {user && (
                                         <div className="flex items-center gap-2 sm:gap-3">
                                             <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">

@@ -16,6 +16,61 @@ body {
         padding-left: 1rem;
         padding-right: 1rem;
     }
+    
+    /* Mobile-specific adjustments */
+    .mobile-full-width {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .mobile-stack {
+        flex-direction: column !important;
+    }
+    
+    .mobile-center {
+        text-align: center !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+    
+    .mobile-hidden {
+        display: none !important;
+    }
+    
+    .mobile-text-sm {
+        font-size: 0.875rem !important;
+    }
+    
+    .mobile-text-xs {
+        font-size: 0.75rem !important;
+    }
+    
+    .mobile-p-2 {
+        padding: 0.5rem !important;
+    }
+    
+    .mobile-p-3 {
+        padding: 0.75rem !important;
+    }
+    
+    .mobile-m-1 {
+        margin: 0.25rem !important;
+    }
+    
+    .mobile-gap-2 {
+        gap: 0.5rem !important;
+    }
+}
+
+/* Tablet styles */
+@media (min-width: 641px) and (max-width: 1023px) {
+    .tablet-full-width {
+        width: 100% !important;
+    }
+    
+    .tablet-stack {
+        flex-direction: column !important;
+    }
 }
 
 /* Custom responsive variables */
@@ -50,6 +105,52 @@ button {
 /* Better form inputs on mobile */
 input, textarea, select {
     min-height: 44px;
+}
+
+/* Mobile card styles */
+@media (max-width: 640px) {
+    .card {
+        border-radius: 0.5rem !important;
+        margin: 0.5rem !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .mobile-card {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Mobile navigation */
+    .mobile-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-top: 1px solid #e5e7eb;
+        padding: 0.5rem;
+        z-index: 50;
+    }
+    
+    /* Mobile table styles */
+    .mobile-table {
+        font-size: 0.875rem;
+    }
+    
+    .mobile-table th,
+    .mobile-table td {
+        padding: 0.5rem;
+        white-space: nowrap;
+    }
+    
+    /* Mobile chart container */
+    .mobile-chart {
+        max-height: 300px;
+        overflow-x: auto;
+    }
 }
 
 /* Better focus states for touch devices */
