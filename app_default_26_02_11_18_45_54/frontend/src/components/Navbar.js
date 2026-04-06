@@ -42,14 +42,14 @@ const Navbar = ({ children }) => {
 
     return (
         <div className="flex flex-col h-screen bg-gray-50">
-            {isParticipant ? (
-                // Navbar horizontale pour PARTICIPANT
+            {isParticipant || isTrainer ? (
+                // Navbar horizontale pour PARTICIPANT et TRAINER
                 <>
                     <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4 sm:gap-8">
                                 <img 
-                                    src="/logo4.png" 
+                                    src="/logo6.png" 
                                     alt="Logo" 
                                     className="w-32 h-10 sm:w-40 sm:h-12 object-contain"
                                 />
@@ -66,7 +66,10 @@ const Navbar = ({ children }) => {
                                         if (item.adminOnly || item.rhOnly) {
                                             return false;
                                         }
-                                        if (item.participantOnly) {
+                                        if (item.participantOnly && isParticipant) {
+                                            return true;
+                                        }
+                                        if (item.trainerOnly && isTrainer) {
                                             return true;
                                         }
                                         return false;
@@ -126,124 +129,10 @@ const Navbar = ({ children }) => {
                                         if (item.adminOnly || item.rhOnly) {
                                             return false;
                                         }
-                                        if (item.participantOnly) {
+                                        if (item.participantOnly && isParticipant) {
                                             return true;
                                         }
-                                        return false;
-                                    }).map((item) => {
-                                        const Icon = item.icon;
-                                        const isActive = activeNav === item.id;
-                                        return (
-                                            <button
-                                                key={item.id}
-                                                onClick={() => {
-                                                    handleNavClick(item);
-                                                    setMobileMenuOpen(false);
-                                                }}
-                                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-                                                    isActive
-                                                        ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
-                                                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                                                }`}
-                                            >
-                                                <Icon size={18} className={isActive ? 'text-blue-600' : 'text-gray-400'} />
-                                                <span className="font-medium">{item.label}</span>
-                                            </button>
-                                        );
-                                    })}
-                                </nav>
-                            </div>
-                        )}
-                    </header>
-                    <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
-                        {children}
-                    </main>
-                </>
-            ) : isTrainer ? (
-                // Navbar horizontale pour TRAINER
-                <>
-                    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4 sm:gap-8">
-                                <img 
-                                    src="/logo4.png" 
-                                    alt="Logo" 
-                                    className="w-32 h-10 sm:w-40 sm:h-12 object-contain"
-                                />
-                                {/* Mobile menu button */}
-                                <button
-                                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                    className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                                >
-                                    <Menu size={20} className="text-gray-600" />
-                                </button>
-                                {/* Desktop navigation */}
-                                <nav className="hidden lg:flex items-center gap-6">
-                                    {navItems.filter((item) => {
-                                        if (item.adminOnly || item.rhOnly) {
-                                            return false;
-                                        }
-                                        if (item.trainerOnly) {
-                                            return true;
-                                        }
-                                        return false;
-                                    }).map((item) => {
-                                        const Icon = item.icon;
-                                        const isActive = activeNav === item.id;
-                                        return (
-                                            <button
-                                                key={item.id}
-                                                onClick={() => handleNavClick(item)}
-                                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-                                                    isActive
-                                                        ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
-                                                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                                                }`}
-                                            >
-                                                <Icon size={18} className={isActive ? 'text-blue-600' : 'text-gray-400'} />
-                                                <span className="font-medium">{item.label}</span>
-                                            </button>
-                                        );
-                                    })}
-                                </nav>
-                            </div>
-                            <div className="flex items-center gap-2 sm:gap-4">
-                                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                                    <Moon size={20} className="text-gray-600" />
-                                </button>
-                                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative">
-                                    <Bell size={20} className="text-gray-600" />
-                                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                                </button>
-                                {user && (
-                                    <div className="flex items-center gap-2 sm:gap-3">
-                                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                                            <UserIcon size={16} className="text-white" />
-                                        </div>
-                                        <div className="hidden sm:block">
-                                            <p className="font-semibold text-gray-800 text-sm">{user.fullName}</p>
-                                            <ChevronDown size={16} className="text-gray-400" />
-                                        </div>
-                                    </div>
-                                )}
-                                <button
-                                    onClick={logout}
-                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                                    title="Déconnexion"
-                                >
-                                    <LogOut size={20} className="text-gray-600" />
-                                </button>
-                            </div>
-                        </div>
-                        {/* Mobile navigation menu */}
-                        {mobileMenuOpen && (
-                            <div className="lg:hidden mt-4 pt-4 border-t border-gray-200">
-                                <nav className="flex flex-col gap-2">
-                                    {navItems.filter((item) => {
-                                        if (item.adminOnly || item.rhOnly) {
-                                            return false;
-                                        }
-                                        if (item.trainerOnly) {
+                                        if (item.trainerOnly && isTrainer) {
                                             return true;
                                         }
                                         return false;
@@ -277,142 +166,34 @@ const Navbar = ({ children }) => {
                     </main>
                 </>
             ) : (
-                // Layout avec sidebar pour ADMIN et RH
-                <div className="flex flex-1">
-                    {/* Mobile menu overlay */}
-                    {mobileMenuOpen && (
-                        <div 
-                            className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-                            onClick={() => setMobileMenuOpen(false)}
-                        />
-                    )}
-                    {/* Sidebar */}
-                    <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} ${mobileMenuOpen ? 'fixed lg:relative inset-y-0 left-0 z-50 lg:z-auto' : ''} bg-white border-r border-gray-200 flex flex-col transition-all duration-300 lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-                        {/* Logo Section */}
-                        <div className="p-2 sm:p-4 border-b border-gray-200">
-                            <div className="flex items-center justify-between">
-                                {sidebarOpen ? (
-                                    <div className="flex items-center gap-3">
-                                        <img 
-                                            src="/logo4.png" 
-                                            alt="Logo" 
-                                            className="w-32 h-12 sm:w-48 sm:h-16 object-contain"
-                                        />
-                                    </div>
-                                ) : (
-                                    <img 
-                                        src="/logo4.png" 
-                                        alt="Logo" 
-                                        className="w-12 h-8 sm:w-16 sm:h-12 object-contain mx-auto"
-                                    />
-                                )}
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                                        className="hidden lg:flex p-1 hover:bg-gray-100 rounded-lg transition-colors"
-                                    >
-                                        <Menu size={20} className="text-gray-600" />
-                                    </button>
-                                    <button
-                                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                        className="lg:hidden p-1 hover:bg-gray-100 rounded-lg transition-colors"
-                                    >
-                                        <X size={20} className="text-gray-600" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Navigation Items */}
-                        <nav className="flex-1 overflow-y-auto p-2 sm:p-4">
-                            <div className="space-y-1">
-                                {navItems.filter((item) => {
-                                    if (item.adminOnly && !item.rhAllowed) {
-                                        return user && user.role === 'ADMIN';
-                                    }
-                                    if (item.adminOnly && item.rhAllowed) {
-                                        return user && (user.role === 'ADMIN' || user.role === 'RH');
-                                    }
-                                    if (item.rhOnly) {
-                                        return user && user.role === 'RH';
-                                    }
-                                    if (item.participantOnly) {
-                                        return false;
-                                    }
-                                    if (item.trainerOnly) {
-                                        return user && user.role === 'TRAINER';
-                                    }
-                                    return true;
-                                }).map((item) => {
-                                    const Icon = item.icon;
-                                    const isActive = activeNav === item.id;
-                                    return (
-                                        <button
-                                            key={item.id}
-                                            onClick={() => {
-                                                handleNavClick(item);
-                                                setMobileMenuOpen(false);
-                                            }}
-                                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${
-                                                isActive
-                                                    ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
-                                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                                            }`}
-                                        >
-                                            <Icon size={20} className={isActive ? 'text-blue-600' : 'text-gray-400'} />
-                                            {sidebarOpen && (
-                                                <>
-                                                    <span className="flex-1 text-left font-medium text-sm">{item.label}</span>
-                                                    {item.badge && (
-                                                        <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
-                                                            {item.badge}
-                                                        </span>
-                                                    )}
-                                                    {item.hasDropdown && (
-                                                        <ChevronRight size={16} className="text-gray-400" />
-                                                    )}
-                                                </>
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </nav>
-
-                        {/* User Section */}
-                        {sidebarOpen && user && (
-                            <div className="p-2 sm:p-4 border-t border-gray-200">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                                        <UserIcon size={16} className="text-white" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-gray-800 text-sm truncate">{user.fullName}</p>
-                                        <p className="text-xs text-gray-500">{user.role}</p>
-                                    </div>
-                                    <ChevronDown size={16} className="text-gray-400 flex-shrink-0" />
-                                </div>
-                            </div>
-                        )}
-                    </aside>
-
-                    {/* Main Content Area */}
-                    <div className="flex-1 flex flex-col min-w-0">
-                        {/* Top Bar */}
+                // Layout avec sidebar pour ADMIN et RH (desktop) et navbar horizontale (mobile)
+                <>
+                    {/* Mobile navbar horizontale pour ADMIN et RH */}
+                    <div className="lg:hidden">
                         <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
                             <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 sm:gap-4">
+                                <div className="flex items-center gap-4 sm:gap-8">
+                                    <img 
+                                        src="/logo6.png" 
+                                        alt="Logo" 
+                                        className="w-32 h-10 sm:w-40 sm:h-12 object-contain"
+                                    />
                                     {/* Mobile menu button */}
                                     <button
                                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                        className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                                     >
                                         <Menu size={20} className="text-gray-600" />
                                     </button>
-                                    <h1 className="text-lg sm:text-2xl font-bold text-gray-800 truncate">Dashboard</h1>
                                 </div>
                                 <div className="flex items-center gap-2 sm:gap-4">
-                                 
+                                    <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                        <Moon size={20} className="text-gray-600" />
+                                    </button>
+                                    <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative">
+                                        <Bell size={20} className="text-gray-600" />
+                                        <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                                    </button>
                                     {user && (
                                         <div className="flex items-center gap-2 sm:gap-3">
                                             <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
@@ -433,14 +214,192 @@ const Navbar = ({ children }) => {
                                     </button>
                                 </div>
                             </div>
+                            {/* Mobile navigation menu */}
+                            {mobileMenuOpen && (
+                                <div className="mt-4 pt-4 border-t border-gray-200">
+                                    <nav className="flex flex-col gap-2">
+                                        {navItems.filter((item) => {
+                                            if (item.adminOnly && !item.rhAllowed) {
+                                                return user && user.role === 'ADMIN';
+                                            }
+                                            if (item.adminOnly && item.rhAllowed) {
+                                                return user && (user.role === 'ADMIN' || user.role === 'RH');
+                                            }
+                                            if (item.rhOnly) {
+                                                return user && user.role === 'RH';
+                                            }
+                                            if (item.participantOnly || item.trainerOnly) {
+                                                return false;
+                                            }
+                                            return true;
+                                        }).map((item) => {
+                                            const Icon = item.icon;
+                                            const isActive = activeNav === item.id;
+                                            return (
+                                                <button
+                                                    key={item.id}
+                                                    onClick={() => {
+                                                        handleNavClick(item);
+                                                        setMobileMenuOpen(false);
+                                                    }}
+                                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                                                        isActive
+                                                            ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
+                                                            : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                                                    }`}
+                                                >
+                                                    <Icon size={18} className={isActive ? 'text-blue-600' : 'text-gray-400'} />
+                                                    <span className="font-medium">{item.label}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </nav>
+                                </div>
+                            )}
                         </header>
-
-                        {/* Page Content */}
                         <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
                             {children}
                         </main>
                     </div>
-                </div>
+
+                    {/* Desktop sidebar pour ADMIN et RH */}
+                    <div className="hidden lg:flex flex-1">
+                        {/* Sidebar */}
+                        <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300`}>
+                            {/* Logo Section */}
+                            <div className="p-2 sm:p-4 border-b border-gray-200">
+                                <div className="flex items-center justify-between">
+                                    {sidebarOpen ? (
+                                        <div className="flex items-center gap-3">
+                                            <img 
+                                                src="/logo6.png" 
+                                                alt="Logo" 
+                                                className="w-32 h-12 sm:w-48 sm:h-16 object-contain"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <img 
+                                            src="/logo6.png" 
+                                            alt="Logo" 
+                                            className="w-12 h-8 sm:w-16 sm:h-12 object-contain mx-auto"
+                                        />
+                                    )}
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                                            className="hidden lg:flex p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                                        >
+                                            <Menu size={20} className="text-gray-600" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Navigation Items */}
+                            <nav className="flex-1 overflow-y-auto p-2 sm:p-4">
+                                <div className="space-y-1">
+                                    {navItems.filter((item) => {
+                                        if (item.adminOnly && !item.rhAllowed) {
+                                            return user && user.role === 'ADMIN';
+                                        }
+                                        if (item.adminOnly && item.rhAllowed) {
+                                            return user && (user.role === 'ADMIN' || user.role === 'RH');
+                                        }
+                                        if (item.rhOnly) {
+                                            return user && user.role === 'RH';
+                                        }
+                                        if (item.participantOnly || item.trainerOnly) {
+                                            return false;
+                                        }
+                                        return true;
+                                    }).map((item) => {
+                                        const Icon = item.icon;
+                                        const isActive = activeNav === item.id;
+                                        return (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => handleNavClick(item)}
+                                                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${
+                                                    isActive
+                                                        ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
+                                                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                                                }`}
+                                            >
+                                                <Icon size={20} className={isActive ? 'text-blue-600' : 'text-gray-400'} />
+                                                {sidebarOpen && (
+                                                    <>
+                                                        <span className="flex-1 text-left font-medium text-sm">{item.label}</span>
+                                                        {item.badge && (
+                                                            <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
+                                                                {item.badge}
+                                                            </span>
+                                                        )}
+                                                        {item.hasDropdown && (
+                                                            <ChevronRight size={16} className="text-gray-400" />
+                                                        )}
+                                                    </>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </nav>
+
+                            {/* User Section */}
+                            {sidebarOpen && user && (
+                                <div className="p-2 sm:p-4 border-t border-gray-200">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
+                                            <UserIcon size={16} className="text-white" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-semibold text-gray-800 text-sm truncate">{user.fullName}</p>
+                                            <p className="text-xs text-gray-500">{user.role}</p>
+                                        </div>
+                                        <ChevronDown size={16} className="text-gray-400 flex-shrink-0" />
+                                    </div>
+                                </div>
+                            )}
+                        </aside>
+
+                        {/* Main Content Area */}
+                        <div className="flex-1 flex flex-col min-w-0">
+                            {/* Top Bar */}
+                            <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2 sm:gap-4">
+                                        <h1 className="text-lg sm:text-2xl font-bold text-gray-800 truncate">Dashboard</h1>
+                                    </div>
+                                    <div className="flex items-center gap-2 sm:gap-4">
+                                        {user && (
+                                            <div className="flex items-center gap-2 sm:gap-3">
+                                                <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
+                                                    <UserIcon size={16} className="text-white" />
+                                                </div>
+                                                <div className="hidden sm:block">
+                                                    <p className="font-semibold text-gray-800 text-sm">{user.fullName}</p>
+                                                    <ChevronDown size={16} className="text-gray-400" />
+                                                </div>
+                                            </div>
+                                        )}
+                                        <button
+                                            onClick={logout}
+                                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                            title="Déconnexion"
+                                        >
+                                            <LogOut size={20} className="text-gray-600" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </header>
+
+                            {/* Page Content */}
+                            <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
+                                {children}
+                            </main>
+                        </div>
+                    </div>
+                </>
             )}
         </div>
     );
