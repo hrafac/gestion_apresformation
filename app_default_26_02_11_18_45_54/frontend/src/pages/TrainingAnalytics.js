@@ -185,17 +185,17 @@ const TrainingAnalytics = () => {
             }
 
             // D'abord faire le POST pour lancer l'analyse
-            const postResponse = await fetch('http://analyse-form:8000/analyze', {
+            const postResponse = await fetch('https://gestion-apresformation-1-python.onrender.com/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     database_config: {
-                        host: "postgres",
+                        host: "dpg-d79f5jbuibrs73c5ugs0-a.oregon-postgres.render.com",
                         database: "marsa_eval",
-                        user: "postgres",
-                        password: "password",
+                        user: "marsa_user",
+                        password: "HaQUe0hlwZvaS2MPn6egMB1l2JdeWcIf",
                         port: 5432
                     },
                     analysis_type: "full",
@@ -221,7 +221,7 @@ const TrainingAnalytics = () => {
             
             while (retries > 0 && !success) {
                 try {
-                    getResponse = await fetch('http://analyse-form:8000/analyze', {
+                    getResponse = await fetch('https://gestion-apresformation-1-python.onrender.com/analyze', {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
