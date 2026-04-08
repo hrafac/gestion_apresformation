@@ -34,18 +34,18 @@ services:
         source: /api/*
         destination: https://gestion-apresformation.onrender.com
 
-  # Service Analyse Python (désactivé pour le moment)
-  # - type: web
-  #   name: gestion-apresformation-analyse
-  #   env: docker
-  #   dockerfilePath: ./AnalyseForm/Dockerfile
-  #   dockerContext: ./AnalyseForm
-  #   healthCheckPath: /health
-  #   envVars:
-  #     - key: PYTHONPATH
-  #       value: /app
-  #     - key: PYTHONUNBUFFERED
-  #       value: 1
+  # Service Analyse Python
+  - type: web
+    name: gestion-apresformation-1-pyhton
+    env: docker
+    dockerfilePath: ./AnalyseForm/Dockerfile
+    dockerContext: ./AnalyseForm
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHONPATH
+        value: /app
+      - key: PYTHONUNBUFFERED
+        value: 1
 
 # Base de données PostgreSQL
 databases:

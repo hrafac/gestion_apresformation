@@ -28,7 +28,7 @@ const TrainingAnalytics = () => {
     // Health check pour le service d'analyse
     const checkAnalysisServiceHealth = async () => {
         try {
-            const response = await fetch('https://gestion-apresformation-1-python.onrender.com/', {
+            const response = await fetch('https://gestion-apresformation-1-pyhton.onrender.com/', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -190,7 +190,7 @@ const TrainingAnalytics = () => {
             }
 
             // D'abord faire le POST pour lancer l'analyse
-            const postResponse = await fetch('https://gestion-apresformation-1-python.onrender.com/analyze', {
+            const postResponse = await fetch('https://gestion-apresformation-1-pyhton.onrender.com/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -227,7 +227,7 @@ const TrainingAnalytics = () => {
             
             while (retries > 0 && !success) {
                 try {
-                    getResponse = await fetch('https://gestion-apresformation-1-python.onrender.com/analyze', {
+                    getResponse = await fetch('https://gestion-apresformation-1-pyhton.onrender.com/analyze', {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
@@ -359,7 +359,7 @@ const TrainingAnalytics = () => {
             
             while (retries > 0 && !success) {
                 try {
-                    response = await fetch('https://gestion-apresformation-1-python.onrender.com/analyze', {
+                    response = await fetch('https://gestion-apresformation-1-pyhton.onrender.com/analyze', {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
