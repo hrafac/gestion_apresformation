@@ -28,7 +28,7 @@ const TrainingAnalytics = () => {
     // Health check pour le service d'analyse
     const checkAnalysisServiceHealth = async () => {
         try {
-            const response = await fetch('http://analyse-form:8000/', {
+            const response = await fetch('https://gestion-apresformation-1-python.onrender.com/', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ const TrainingAnalytics = () => {
     const getParticipantCount = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://backend:8080/api/auth/users/participants/count', {
+            const response = await fetch('https://gestion-apresformation.onrender.com/api/auth/users/participants/count', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ const TrainingAnalytics = () => {
     const getTotalFormations = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://backend:8080/api/training/count/total', {
+            const response = await fetch('https://gestion-apresformation.onrender.com/api/training/count/total', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ const TrainingAnalytics = () => {
     const getCompletedFormations = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://backend:8080/api/training/count/completed', {
+            const response = await fetch('https://gestion-apresformation.onrender.com/api/training/count/completed', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -352,7 +352,7 @@ const TrainingAnalytics = () => {
             
             while (retries > 0 && !success) {
                 try {
-                    response = await fetch('http://analyse-form:8000/analyze', {
+                    response = await fetch('https://gestion-apresformation-1-python.onrender.com/analyze', {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
