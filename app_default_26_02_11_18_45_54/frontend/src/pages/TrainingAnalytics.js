@@ -32,13 +32,18 @@ const TrainingAnalytics = () => {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                }
+                },
+                mode: 'cors'
             });
             const isHealthy = response.ok;
             setAnalysisServiceStatus(isHealthy ? 'available' : 'unavailable');
             return isHealthy;
         } catch (err) {
             console.warn('Analysis service health check failed:', err);
+            // Check if it's a CORS error
+            if (err.message.includes('CORS') || err.message.includes('fetch')) {
+                console.warn('CORS error detected - backend may need to be updated');
+            }
             setAnalysisServiceStatus('unavailable');
             return false;
         }
@@ -190,6 +195,7 @@ const TrainingAnalytics = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                mode: 'cors',
                 body: JSON.stringify({
                     database_config: {
                         host: "dpg-d79f5jbuibrs73c5ugs0-a.oregon-postgres.render.com",
@@ -225,7 +231,8 @@ const TrainingAnalytics = () => {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
-                        }
+                        },
+                        mode: 'cors'
                     });
 
                     if (getResponse.ok) {
@@ -356,7 +363,8 @@ const TrainingAnalytics = () => {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
-                        }
+                        },
+                        mode: 'cors'
                     });
 
                     if (response.ok) {
